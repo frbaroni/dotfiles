@@ -1,0 +1,6 @@
+{
+  "eslint.autoFixOnSave": true,
+  "coc.preferences.hoverTarget": "preview",
+  "coc.preferences.previewAutoClose": false,
+  "coc.preferences.formatOnSaveFiletypes": ["css", "markdown", "typescriptreact"],
+}

@@ -1,0 +1,115 @@
+---
+- name: Installing system
+  hosts: localhost
+  connection: local
+  vars:
+    user_name: fernando
+    user_group: fernando
+    distro_home: "/home/fernando"
+    frb_home: "/frb"
+  tasks:
+    - name: Update the system
+      become: yes
+      pacman:
+        update_cache: yes
+        upgrade: yes
+
+    - name: Install system packages
+      become: yes
+      pacman:
+        name: [
+            "flatpak",
+            "cronie",
+            "docker",
+            "git",
+            "neovim",
+            "borg",
+            "xclip",
+            "tmux",
+            "tmuxp",
+            "docker-compose",
+            "ripgrep",
+            "firefox",
+            "thunderbird",
+            "zsh",
+            "nodejs",
+            "virt-manager",
+            "qemu",
+            "variety"
+          ]
+        state: present
+
+    - name: Install pynvim
+      pip:
+        name: pynvim
+        state: present
+
+    - name: Create vim folders
+      file:
+        path: "{{ item }}"
+        state: directory
+      with_items:
+        - '{{ distro_home }}/.vim_undo/'
+        - '{{ distro_home }}/.vim_backup/'
+        - '{{ distro_home }}/.vim_swap/'
+
+    - name: borgbackup reboot cronjob
+      cron:
+        name: "borgbackup cron job"
+        special_time: reboot
+        user: "{{ user_name }}"
+        job: "{{ frb_home }}/Sync/borgbackup/cron.sh"
+
+    - name: Create symbolic links
+      file:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: "{{ user_name }}"
+        group: "{{ user_group }}"
+        state: link
+      with_items:
+        - { src: '{{ frb_home }}/Sync/dotfiles', dest: '{{ distro_home }}/dotfiles' }
+        - { src: '{{ frb_home }}/Sync/dotfiles/ssh', dest: '{{ distro_home }}/.ssh' }
+        - { src: '{{ frb_home }}/Sync/dotfiles/awesome', dest: '{{ distro_home }}/.config/awesome' }
+        - { src: '{{ frb_home }}/Sync/dotfiles/vim', dest: '{{ distro_home }}/.vim' }
+        - { src: '{{ frb_home }}/Sync/dotfiles/vim', dest: '{{ distro_home }}/nvim' }
+        - { src: '{{ frb_home }}/Sync/dotfiles/vim', dest: '{{ distro_home }}/.config/vim' }
+        - { src: '{{ frb_home }}/Sync/dotfiles/vim', dest: '{{ distro_home }}/.config/nvim' }
+        - { src: '{{ frb_home }}/VMNetwork', dest: '{{ distro_home }}/VMNetwork' }
+        - { src: '{{ frb_home }}/Fotos', dest: '{{ distro_home }}/Fotos' }
+        - { src: '{{ frb_home }}/Sync', dest: '{{ distro_home }}/Sync' }
+        - { src: '{{ frb_home }}/p', dest: '{{ distro_home }}/p' }
+        - { src: '{{ frb_home }}/thunderbird', dest: '{{ distro_home }}/.thunderbird' }
+
+    - name: Add flathub repository
+      flatpak_remote:
+        name: flathub
+        state: present
+        flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+        method: user
+
+    - name: Install flatpack packages
+      flatpak:
+        name: "{{ item }}"
+        state: present
+        method: user
+      with_items:
+        - com.calibre_ebook.calibre
+        - io.dbeaver.DBeaverCommunity
+        - com.discordapp.Discord
+        - org.zealdocs.Zeal
+        - org.godotengine.Godot
+        - org.keepassxc.KeePassXC
+        - me.kozec.syncthingtk
+        - org.speedcrunch.SpeedCrunch
+        - com.jgraph.drawio.desktop
+
+    - name: Cloning oh-my-zsh
+      git: repo=https://github.com/robbyrussell/oh-my-zsh dest={{ distro_home }}/.oh-my-zsh
+
+    - name: Install oh-my-zsh template zshrc
+      command: cp {{ distro_home }}/.oh-my-zsh/templates/zshrc.zsh-template {{ distro_home }}/.zshrc
+
+    - name: Set zsh as default shell
+      command: chsh -s /usr/bin/zsh {{ user_name }}
+      become: yes
