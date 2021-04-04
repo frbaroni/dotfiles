@@ -348,7 +348,7 @@ Plug 'neoclide/coc-rls', {'do': 'yarn install --frozen-lockfile'}
   nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
 
 Plug 'takac/vim-hardtime'
-  let g:hardtime_default_on = 1
+  let g:hardtime_default_on = 0
 call plug#end()
 
 colorscheme base16-tomorrow-night-eighties

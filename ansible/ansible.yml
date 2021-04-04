@@ -75,6 +75,7 @@
         - { src: '{{ frb_home }}/Sync/dotfiles/vim', dest: '{{ distro_home }}/nvim' }
         - { src: '{{ frb_home }}/Sync/dotfiles/vim', dest: '{{ distro_home }}/.config/vim' }
         - { src: '{{ frb_home }}/Sync/dotfiles/vim', dest: '{{ distro_home }}/.config/nvim' }
+        - { src: '{{ frb_home }}/Sync/dotfiles/tmux/zshrc', dest: '{{ distro_home }}/.zshrc' }
         - { src: '{{ frb_home }}/VMNetwork', dest: '{{ distro_home }}/VMNetwork' }
         - { src: '{{ frb_home }}/Fotos', dest: '{{ distro_home }}/Fotos' }
         - { src: '{{ frb_home }}/Sync', dest: '{{ distro_home }}/Sync' }
@@ -106,9 +107,6 @@
 
     - name: Cloning oh-my-zsh
       git: repo=https://github.com/robbyrussell/oh-my-zsh dest={{ distro_home }}/.oh-my-zsh
-
-    - name: Install oh-my-zsh template zshrc
-      command: cp {{ distro_home }}/.oh-my-zsh/templates/zshrc.zsh-template {{ distro_home }}/.zshrc
 
     - name: Set zsh as default shell
       command: chsh -s /usr/bin/zsh {{ user_name }}
