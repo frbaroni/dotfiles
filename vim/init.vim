@@ -1,3 +1,5 @@
+let mapleader=","
+
 if empty(glob('~/.vim/autoload/plug.vim'))
   silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
     \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
@@ -45,6 +47,8 @@ set updatetime=300
 set autoread
 set title
 
+set list
+set listchars=tab:>\ ,trail:-,extends:>,precedes:<,nbsp:+
 "  Disable Bells
 set noerrorbells visualbell t_vb=
 autocmd GUIEnter * set visualbell t_vb=
