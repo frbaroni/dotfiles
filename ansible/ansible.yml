@@ -35,7 +35,9 @@
             "nodejs",
             "virt-manager",
             "qemu",
-            "variety"
+            "variety",
+            "bat",
+            "exa"
           ]
         state: present
 
@@ -75,7 +77,7 @@
         - { src: '{{ frb_home }}/Sync/dotfiles/vim', dest: '{{ distro_home }}/nvim' }
         - { src: '{{ frb_home }}/Sync/dotfiles/vim', dest: '{{ distro_home }}/.config/vim' }
         - { src: '{{ frb_home }}/Sync/dotfiles/vim', dest: '{{ distro_home }}/.config/nvim' }
-        - { src: '{{ frb_home }}/Sync/dotfiles/tmux/zshrc', dest: '{{ distro_home }}/.zshrc' }
+        - { src: '{{ frb_home }}/Sync/dotfiles/zsh/zshrc', dest: '{{ distro_home }}/.zshrc' }
         - { src: '{{ frb_home }}/VMNetwork', dest: '{{ distro_home }}/VMNetwork' }
         - { src: '{{ frb_home }}/Fotos', dest: '{{ distro_home }}/Fotos' }
         - { src: '{{ frb_home }}/Sync', dest: '{{ distro_home }}/Sync' }
