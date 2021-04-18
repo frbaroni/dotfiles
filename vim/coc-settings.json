@@ -3,4 +3,7 @@
   "coc.preferences.hoverTarget": "preview",
   "coc.preferences.previewAutoClose": false,
   "coc.preferences.formatOnSaveFiletypes": ["css", "markdown", "typescriptreact"],
+  "yaml.schemas": {
+    "kubernetes": "/*.yaml"
+  }
 }

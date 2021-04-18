@@ -331,7 +331,7 @@ globalkeys = gears.table.join(
       awful.key({ modkey }, "z", function () awful.spawn("xfce4-appfinder") end,
                  {description = "xfce4-appfinder", group = "launcher"}),
 
-      awful.key({ modkey }, "l", function () awful.spawn("i3lock") end,
+      awful.key({ modkey }, "ç", function () awful.spawn("i3lock") end,
                  {description = "i3lock", group = "launcher"}),
 
       awful.key({ }, "Print", function () awful.util.spawn("xfce4-screenshooter") end,

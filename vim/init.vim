@@ -59,10 +59,12 @@ cmap w!! w !sudo tee > /dev/null %
 call plug#begin()
 " Vim Startify / MRU
 Plug 'mhinz/vim-startify'
+    let g:startify_session_autoload = 1
+    let g:startify_session_persistence = 1
     let g:startify_lists = [
+          \ { 'type': 'sessions',  'header': ['   Sessions']       },
           \ { 'type': 'dir',       'header': ['   MRU '. getcwd()] },
           \ { 'type': 'files',     'header': ['   MRU']            },
-          \ { 'type': 'sessions',  'header': ['   Sessions']       },
           \ { 'type': 'bookmarks', 'header': ['   Bookmarks']      },
           \ { 'type': 'commands',  'header': ['   Commands']       },
           \ ]
@@ -138,7 +140,7 @@ Plug 'othree/eregex.vim'
 Plug 'christoomey/vim-tmux-navigator'
 
 " Auto CH dir to project root (based on .git, .svn...)
-Plug 'airblade/vim-rooter'
+" Plug 'airblade/vim-rooter'
 
 " Polyglot - multi language syntax, indent...
 Plug 'sheerun/vim-polyglot'
@@ -200,6 +202,7 @@ Plug 'neoclide/coc-snippets', {'do': 'yarn install --frozen-lockfile'}
 Plug 'neoclide/coc-tsserver', {'do': 'yarn install --frozen-lockfile'}
 Plug 'fannheyward/coc-pyright', {'do': 'yarn install --frozen-lockfile'}
 Plug 'neoclide/coc-java', {'do': 'yarn install --frozen-lockfile'}
+Plug 'neoclide/coc-yaml', {'do': 'yarn install --frozen-lockfile'}
 Plug 'dansomething/coc-java-debug'
   nmap <F1> :CocCommand java.debug.vimspector.start<CR>
 " Config .vimspector.json per project root:
