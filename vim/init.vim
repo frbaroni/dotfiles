@@ -5,7 +5,6 @@ if empty(glob('~/.vim/autoload/plug.vim'))
     \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
-let g:python3_host_prog="/usr/bin/python3"
 
 syntax on
 filetype indent on
@@ -138,20 +137,20 @@ Plug 'sodapopcan/vim-twiggy'
 Plug 'airblade/vim-gitgutter'
 
 " Perl Regex eregex
-Plug 'othree/eregex.vim'
+" Plug 'othree/eregex.vim'
 
 " Tmux integration
-Plug 'christoomey/vim-tmux-navigator'
+" Plug 'christoomey/vim-tmux-navigator'
 
 " Auto CH dir to project root (based on .git, .svn...)
 " Plug 'airblade/vim-rooter'
 
 " Polyglot - multi language syntax, indent...
-Plug 'sheerun/vim-polyglot'
-  let g:jsx_ext_required = 0 " Allow JSX in normal JS files
+"Plug 'sheerun/vim-polyglot'
+" let g:jsx_ext_required = 0 " Allow JSX in normal JS files
 
 " Show Coverage
-Plug 'ruanyl/coverage.vim'
+" Plug 'ruanyl/coverage.vim'
 
 " FZF Fuzzy file searhcer
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
@@ -187,12 +186,14 @@ Plug 'junegunn/fzf.vim'
   let $FZF_DEFAULT_OPTS = '--bind ctrl-a:select-all'
 
 " UltiNips - for COC
-Plug 'SirVer/ultisnips'
-Plug 'honza/vim-snippets'
+" Plug 'honza/vim-snippets'
 
 " Vimspector - CoreLLDB/LLDB debugger
-let g:vimspector_enable_mappings = 'HUMAN'
-Plug 'puremourning/vimspector'
+" let g:vimspector_enable_mappings = 'HUMAN'
+" Plug 'puremourning/vimspector'
+
+Plug 'takac/vim-hardtime'
+    let g:hardtime_default_on = 1
 
 " Rust Crates
 Plug 'mhinz/vim-crates'
@@ -202,19 +203,10 @@ endif
 
 " COC
 Plug 'neoclide/coc.nvim', {'do': { -> coc#util#install()}}
-Plug 'neoclide/coc-snippets', {'do': 'yarn install --frozen-lockfile'}
 Plug 'neoclide/coc-tsserver', {'do': 'yarn install --frozen-lockfile'}
 Plug 'fannheyward/coc-pyright', {'do': 'yarn install --frozen-lockfile'}
-Plug 'neoclide/coc-java', {'do': 'yarn install --frozen-lockfile'}
 Plug 'neoclide/coc-yaml', {'do': 'yarn install --frozen-lockfile'}
-Plug 'dansomething/coc-java-debug'
-  nmap <F1> :CocCommand java.debug.vimspector.start<CR>
-" Config .vimspector.json per project root:
-" { "adapters": { "java-debug-server": { "name": "vscode-java", "port": "${AdapterPort}" } }, "configurations": { "Java Attach": { "default": true, "adapter": "java-debug-server", "configuration": { "request": "attach", "host": "127.0.0.1", "port": "5005" }, "breakpoints": { "exception": { "caught": "N", "uncaught": "N" } } } } }
-Plug 'neoclide/coc-emmet', {'do': 'yarn install --frozen-lockfile'}
 Plug 'neoclide/coc-css', {'do': 'yarn install --frozen-lockfile'}
-Plug 'neoclide/coc-prettier', {'do': 'yarn install --frozen-lockfile'}
-Plug 'neoclide/coc-rls', {'do': 'yarn install --frozen-lockfile'}
   inoremap <silent><expr> <TAB>
         \ pumvisible() ? coc#_select_confirm() :
         \ coc#expandableOrJumpable() ? "\<C-r>=coc#rpc#request('doKeymap', ['snippets-expand-jump',''])\<CR>" :
@@ -353,9 +345,6 @@ Plug 'neoclide/coc-rls', {'do': 'yarn install --frozen-lockfile'}
   nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
   " Resume latest coc list.
   nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
-
-Plug 'takac/vim-hardtime'
-  let g:hardtime_default_on = 0
 call plug#end()
 
 colorscheme base16-tomorrow-night-eighties
