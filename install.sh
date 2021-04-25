@@ -6,7 +6,7 @@ DISTRO_HOME=$(realpath ~)
 DOTFILES=$(realpath $(dirname "$0"))
 DISTRO=$(awk -F= '/^NAME/{print $2}' /etc/os-release | tr -d '"')
 
-SHARED_PACKAGES='flatpak git neovim xclip tmux firefox thunderbird zsh variety cargo'
+SHARED_PACKAGES='flatpak git xclip tmux firefox thunderbird zsh variety cargo'
 ARCH_PACKAGES='virt-manager qemu cronie nodejs borg'
 DEBIAN_PACKAGES='python3-pip yarnpkg'
 CARGO_PACKAGES='alacritty ripgrep exa bat'

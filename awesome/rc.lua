@@ -354,7 +354,7 @@ globalkeys = gears.table.join(
       awful.key({ modkey }, ".", function () awful.spawn("i3lock") end,
                  {description = "i3lock", group = "launcher"}),
 
-      awful.key({ }, "Print", function () awful.util.spawn("flameshot launcher") end,
+      awful.key({ }, "Print", function () awful.util.spawn("flatpak run org.flameshot.Flameshot launcher") end,
                  {description = "flameshot", group = "launcher"}),
 
       awful.key({ }, "XF86AudioPlay", function () awful.util.spawn("mpc toggle") end),
