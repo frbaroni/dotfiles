@@ -12,10 +12,15 @@ local wibox = require("wibox")
 local beautiful = require("beautiful")
 -- Notification library
 local naughty = require("naughty")
+local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup")
 -- Enable hotkeys help widget for VIM and other apps
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
+
+-- Load Debian menu entries
+local debian = require("debian.menu")
+local has_fdo, freedesktop = pcall(require, "freedesktop")
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -47,7 +52,6 @@ end
 beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
-terminal = "xfce4-terminal"
 terminal = "alacritty"
 editor = os.getenv("EDITOR") or "nano"
 editor_cmd = terminal .. " -e " .. editor
@@ -90,13 +94,31 @@ myawesomemenu = {
    { "quit", function() awesome.quit() end },
 }
 
-mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
-                                    { "open terminal", terminal }
-                                  }
-                        })
+local menu_awesome = { "awesome", myawesomemenu, beautiful.awesome_icon }
+local menu_terminal = { "open terminal", terminal }
+
+if has_fdo then
+    mymainmenu = freedesktop.menu.build({
+        before = { menu_awesome },
+        after =  { menu_terminal }
+    })
+else
+    mymainmenu = awful.menu({
+        items = {
+                  menu_awesome,
+                  { "Debian", debian.menu.Debian_menu.Debian },
+                  menu_terminal,
+                }
+    })
+end
+
 
 mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
                                      menu = mymainmenu })
+
+-- Menubar configuration
+menubar.utils.terminal = terminal -- Set the terminal for applications that require it
+-- }}}
 
 -- Keyboard map indicator and switcher
 mykeyboardlayout = awful.widget.keyboardlayout()
@@ -310,32 +332,30 @@ globalkeys = gears.table.join(
     awful.key({ modkey },            "r",     function () awful.screen.focused().mypromptbox:run() end,
               {description = "run prompt", group = "launcher"}),
 
-    awful.key({ modkey }, "\\",
+    awful.key({ modkey }, "[",
               function ()
                   awful.prompt.run {
                     prompt       = "Run Lua code: ",
-                    textbox      = awful.screen.focused().mypromptbox.widget,
+		    textbox      = awful.screen.focused().mypromptbox.widget,
                     exe_callback = awful.util.eval,
                     history_path = awful.util.get_cache_dir() .. "/history_eval"
                   }
               end,
               {description = "lua execute prompt", group = "awesome"}),
-
+    -- Menubar
+    awful.key({ modkey }, "z", function() menubar.show() end,
+              {description = "show the menubar", group = "launcher"}),
 -- Custom
-      awful.key({ modkey,           }, "p", function () awful.spawn.with_shell("echo 'sh ~/.screenlayout/$(zenity --timeout 3 --info $(for f in `ls ~/.screenlayout`; do echo \"--extra-button $f\"; done) --text Select)' > /tmp/chooser && bash /tmp/chooser") end,
-                 {description = "arandr", group = "launcher"}),
+      awful.key({ modkey,           }, "p", function () awful.spawn.with_shell("echo 'sh ~/.screenlayout/$(zenity --timeout 3 --info $(for f in `ls ~/.screenlayout`; do echo \"--extra-button $f\"; done) --text Select)' > /tmp/chooser && bash /tmp/chooser") end, {description = "arandr", group = "launcher"}),
 
       awful.key({ modkey,           }, "x", function () awful.spawn("dmenu_run") end,
                  {description = "dmenu", group = "launcher"}),
 
-      awful.key({ modkey }, "z", function () awful.spawn("xfce4-appfinder") end,
-                 {description = "xfce4-appfinder", group = "launcher"}),
-
-      awful.key({ modkey }, "ç", function () awful.spawn("i3lock") end,
+      awful.key({ modkey }, ".", function () awful.spawn("i3lock") end,
                  {description = "i3lock", group = "launcher"}),
 
-      awful.key({ }, "Print", function () awful.util.spawn("xfce4-screenshooter") end,
-                 {description = "xfce4-screenshooter", group = "launcher"}),
+      awful.key({ }, "Print", function () awful.util.spawn("flameshot launcher") end,
+                 {description = "flameshot", group = "launcher"}),
 
       awful.key({ }, "XF86AudioPlay", function () awful.util.spawn("mpc toggle") end),
       awful.key({ }, "XF86AudioNext", function () awful.util.spawn("mpc next") end),
@@ -583,3 +603,6 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 beautiful.useless_gap = 4
 beautiful.border_focus = "#00ff00"
 awful.spawn("variety --resume")
+awful.spawn("nm-applet")
+awful.spawn("slack")
+awful.spawn("compton -i 0.82")
