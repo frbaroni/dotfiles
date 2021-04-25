@@ -583,3 +583,4 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 beautiful.useless_gap = 4
 beautiful.border_focus = "#00ff00"
 awful.spawn("variety --resume")
+awful.spawn("compton -i 0.85")
