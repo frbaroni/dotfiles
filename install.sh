@@ -26,6 +26,8 @@ if [ "$DISTRO" = "Ubuntu" ]; then
   sudo apt upgrade -y
   echo "Installing Packages"
   sudo apt install -y ${SHARED_PACKAGES} ${DEBIAN_PACKAGES}
+  # NEOVIM
+  sudo apt install ninja-build gettext libtool libtool-bin autoconf automake cmake g++ pkg-config unzip
 else
   echo "NOT UBUNTU"
 fi
@@ -71,3 +73,10 @@ do
   fi
 done
 
+echo "Installing Neovim"
+git clone https://github.com/neovim/neovim ${DISTRO_HOME}/neovim
+cd ${DISTRO_HOME}/neovim
+git pull
+make CMAKE_BUILD_TYPE=Release
+sudo make install
+cd -
