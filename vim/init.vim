@@ -35,7 +35,6 @@ set smartcase
 set cursorline
 set cursorcolumn
 set termguicolors
-set background=dark
 set wildmenu
 set wildmode=full
 set timeoutlen=200
@@ -43,10 +42,10 @@ set ttimeoutlen=0
 set updatetime=100
 set autoread
 set title
-
+set completeopt=menuone,noinsert,noselect
+set shortmess+=c
 set list
 set listchars=tab:>\ ,trail:-,extends:>,precedes:<,nbsp:+
-"  Disable Bells
 set noerrorbells visualbell t_vb=
 autocmd GUIEnter * set visualbell t_vb=
 
@@ -67,24 +66,13 @@ Plug 'mhinz/vim-startify'
 Plug 'unblevable/quick-scope'
 
 " Colorschemes
-Plug 'chriskempson/base16-vim'
+Plug 'gruvbox-community/gruvbox'
 Plug 'xolox/vim-misc'
 Plug 'xolox/vim-colorscheme-switcher'
 
 " Lightline status bar
 Plug 'itchyny/lightline.vim'
   set noshowmode " The bar already contains the mode
-
-" Indent markers
-Plug 'Yggdroot/indentLine'
-
-" Rainbow ({[]})
-Plug 'luochen1990/rainbow'
-  let g:rainbow_active = 1
-  autocmd VimEnter * RainbowToggle
-
-" Which-Key
-Plug 'liuchengxu/vim-which-key'
 
 " Repeat
 Plug 'tpope/vim-repeat'
@@ -113,6 +101,9 @@ Plug 'sodapopcan/vim-twiggy'
 " Git gutter
 Plug 'airblade/vim-gitgutter'
 
+" Whichkey
+Plug 'folke/which-key.nvim'
+
 " FZF Fuzzy file searhcer
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
@@ -130,7 +121,8 @@ Plug 'junegunn/fzf.vim'
 
   " Default fzf layout
   " - down / up / left / right
-  let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.6 } }
+  let g:fzf_layout = { 'down': '30%' }
+  let g:fzf_preview_window = []
 
   " Enable per-command history.
   " CTRL-N and CTRL-P will be automatically bound to next-history and
@@ -139,17 +131,20 @@ Plug 'junegunn/fzf.vim'
   let g:fzf_history_dir = '~/.vim_fzf_history'
   let $FZF_DEFAULT_OPTS = '--bind ctrl-a:select-all'
 
-Plug 'takac/vim-hardtime'
-    let g:hardtime_default_on = 0
-
-" Rust Crates
-Plug 'mhinz/vim-crates'
-if has('nvim')
-  autocmd BufRead Cargo.toml call crates#toggle()
-endif
+" Symbols Outlineer
+Plug 'simrat39/symbols-outline.nvim'
 
 " Treesitter
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+
+" Treesitter Rainbow
+Plug 'p00f/nvim-ts-rainbow'
+
+" Colorizer
+Plug 'norcalli/nvim-colorizer.lua'
+
+" Indent Blankline
+Plug 'Yggdroot/indentLine'
 
 " Nvim Lsp
 Plug 'neovim/nvim-lspconfig'
@@ -163,15 +158,10 @@ Plug 'kyazdani42/nvim-web-devicons'
 " Completion
 Plug 'nvim-lua/completion-nvim'
   autocmd BufEnter * lua require'completion'.on_attach()
-
-  " Set completeopt to have a better completion experience
-  set completeopt=menuone,noinsert,noselect
-
-  " Avoid showing message extra message when using completion
-  set shortmess+=c
 call plug#end()
 
-colorscheme base16-tomorrow-night-eighties
+colorscheme gruvbox
+set background=dark
 highlight Normal guibg=NONE, ctermbg=NONE
 
 lua <<EOF
@@ -189,13 +179,30 @@ lua <<EOF
     return false
   end
 
+  -- Colors
+  require'colorizer'.setup {}
+
+  -- Whichkey
+  require'which-key'.setup {}
+
+  -- Icons
+  require'nvim-web-devicons'.setup {
+    default = true
+  }
+
   -- Treesitter
   require'nvim-treesitter.configs'.setup {
     ensure_installed = "maintained",
     highlight = {
       enable = true,
     },
+    rainbow = {
+      enable = true,
+      extended_mode = true, -- Highlight also non-parentheses delimiters, boolean or table: lang -> boolean
+      max_file_lines = 1000, -- Do not enable for files with more than 1000 lines, int
+    },
   }
+
   -- Nvim Lsp
   local nvim_lsp = require('lspconfig')
   local on_attach = function(client, bufnr)
@@ -269,11 +276,6 @@ EOF
 " Indent and keep selection
 vnoremap > >gv
 vnoremap < <gv
-
-" Whichkey
-nnoremap <silent> <leader>      :<c-u>WhichKey ' '<CR>
-nnoremap <silent> [      :<c-u>WhichKey '['<CR>
-nnoremap <silent> ]      :<c-u>WhichKey ']'<CR>
 
 " w!! Allow saving of files as sudo when I forgot to start vim using sudo.
 cmap w!! w !sudo tee > /dev/null %
