@@ -285,6 +285,7 @@ map <leader>p :Files<cr>
 map <leader>h :History<cr>
 map <leader>b :Buffers<cr>
 map <leader>g :Rg<cr>
+vnoremap <space>* "zy<Esc>:Rg <C-R>z<CR>
 
 " Completion-nvim
 " Use <Tab> and <S-Tab> to navigate through popup menu
