@@ -6,7 +6,7 @@ endif
 
 syntax on
 filetype indent on
-let mapleader=","
+let mapleader=" "
 set encoding=utf-8
 set backupdir=~/.vim_backup/
 set undodir=~/.vim_undo/
@@ -35,7 +35,6 @@ set smartcase
 set cursorline
 set cursorcolumn
 set termguicolors
-set background=dark
 set wildmenu
 set wildmode=full
 set timeoutlen=200
@@ -43,19 +42,12 @@ set ttimeoutlen=0
 set updatetime=100
 set autoread
 set title
-
+set completeopt=menuone,noinsert,noselect
+set shortmess+=c
 set list
 set listchars=tab:>\ ,trail:-,extends:>,precedes:<,nbsp:+
-"  Disable Bells
 set noerrorbells visualbell t_vb=
 autocmd GUIEnter * set visualbell t_vb=
-
-" Indent and keep selection
-vnoremap > >gv
-vnoremap < <gv
-
-" w!! Allow saving of files as sudo when I forgot to start vim using sudo.
-cmap w!! w !sudo tee > /dev/null %
 
 call plug#begin()
 " Vim Startify / MRU
@@ -70,42 +62,17 @@ Plug 'mhinz/vim-startify'
           \ { 'type': 'commands',  'header': ['   Commands']       },
           \ ]
 
-
 " Quick-Scope fF
 Plug 'unblevable/quick-scope'
 
 " Colorschemes
-Plug 'chriskempson/base16-vim'
+Plug 'gruvbox-community/gruvbox'
 Plug 'xolox/vim-misc'
 Plug 'xolox/vim-colorscheme-switcher'
 
 " Lightline status bar
-Plug 'itchyny/lightline.vim'  
+Plug 'itchyny/lightline.vim'
   set noshowmode " The bar already contains the mode
-  let g:lightline = {
-        \ 'colorscheme': 'wombat',
-        \ 'active': {
-        \   'left': [ [ 'mode', 'paste' ],
-        \             [ 'cocstatus', 'readonly', 'filename', 'modified' ] ]
-        \ },
-        \ 'component_function': {
-        \   'cocstatus': 'coc#status'
-        \ },
-        \ }
-
-" Indent markers
-Plug 'Yggdroot/indentLine'
-
-" Rainbow ({[]})
-Plug 'luochen1990/rainbow'
-  let g:rainbow_active = 1
-  autocmd VimEnter * RainbowToggle
-
-" Which-Key
-Plug 'liuchengxu/vim-which-key'
-  nnoremap <silent> <leader>      :<c-u>WhichKey ','<CR>
-  nnoremap <silent> [      :<c-u>WhichKey '['<CR>
-  nnoremap <silent> ]      :<c-u>WhichKey ']'<CR>
 
 " Repeat
 Plug 'tpope/vim-repeat'
@@ -134,15 +101,12 @@ Plug 'sodapopcan/vim-twiggy'
 " Git gutter
 Plug 'airblade/vim-gitgutter'
 
+" Whichkey
+Plug 'folke/which-key.nvim'
+
 " FZF Fuzzy file searhcer
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
-  " Map FZF
-  map <leader>p :Files<cr>
-  map <leader>h :History<cr>
-  map <leader>b :Buffers<cr>
-  map <leader>g :Rg<cr>
-
   function! s:build_quickfix_list(lines)
     call setqflist(map(copy(a:lines), '{ "filename": v:val }'))
     copen
@@ -157,7 +121,8 @@ Plug 'junegunn/fzf.vim'
 
   " Default fzf layout
   " - down / up / left / right
-  let g:fzf_layout = { 'window': { 'width': 0.9, 'height': 0.6 } }
+  let g:fzf_layout = { 'down': '30%' }
+  let g:fzf_preview_window = []
 
   " Enable per-command history.
   " CTRL-N and CTRL-P will be automatically bound to next-history and
@@ -166,17 +131,20 @@ Plug 'junegunn/fzf.vim'
   let g:fzf_history_dir = '~/.vim_fzf_history'
   let $FZF_DEFAULT_OPTS = '--bind ctrl-a:select-all'
 
-Plug 'takac/vim-hardtime'
-    let g:hardtime_default_on = 1
-
-" Rust Crates
-Plug 'mhinz/vim-crates'
-if has('nvim')
-  autocmd BufRead Cargo.toml call crates#toggle()
-endif
+" Symbols Outlineer
+Plug 'simrat39/symbols-outline.nvim'
 
 " Treesitter
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+
+" Treesitter Rainbow
+Plug 'p00f/nvim-ts-rainbow'
+
+" Colorizer
+Plug 'norcalli/nvim-colorizer.lua'
+
+" Indent Blankline
+Plug 'Yggdroot/indentLine'
 
 " Nvim Lsp
 Plug 'neovim/nvim-lspconfig'
@@ -190,19 +158,10 @@ Plug 'kyazdani42/nvim-web-devicons'
 " Completion
 Plug 'nvim-lua/completion-nvim'
   autocmd BufEnter * lua require'completion'.on_attach()
-  " Use <Tab> and <S-Tab> to navigate through popup menu
-  inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
-  inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
-  inoremap <expr> <C-Space> completion#trigger_completion()
-
-  " Set completeopt to have a better completion experience
-  set completeopt=menuone,noinsert,noselect
-
-  " Avoid showing message extra message when using completion
-  set shortmess+=c
 call plug#end()
 
-colorscheme base16-tomorrow-night-eighties
+colorscheme gruvbox
+set background=dark
 highlight Normal guibg=NONE, ctermbg=NONE
 
 lua <<EOF
@@ -220,16 +179,31 @@ lua <<EOF
     return false
   end
 
+  -- Colors
+  require'colorizer'.setup {}
+
+  -- Whichkey
+  require'which-key'.setup {}
+
+  -- Icons
+  require'nvim-web-devicons'.setup {
+    default = true
+  }
+
   -- Treesitter
   require'nvim-treesitter.configs'.setup {
     ensure_installed = "maintained",
     highlight = {
       enable = true,
     },
+    rainbow = {
+      enable = true,
+      extended_mode = true, -- Highlight also non-parentheses delimiters, boolean or table: lang -> boolean
+      max_file_lines = 1000, -- Do not enable for files with more than 1000 lines, int
+    },
   }
+
   -- Nvim Lsp
-
-
   local nvim_lsp = require('lspconfig')
   local on_attach = function(client, bufnr)
     local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
@@ -244,17 +218,17 @@ lua <<EOF
     buf_set_keymap('n', 'K', '<Cmd>lua vim.lsp.buf.hover()<CR>', opts)
     buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
     buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-    buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
-    buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
-    buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
+    buf_set_keymap('n', '<leader>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
+    buf_set_keymap('n', '<leader>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
+    buf_set_keymap('n', '<leader>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
     buf_set_keymap('n', '<leader>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
     buf_set_keymap('n', '<leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
     buf_set_keymap('n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
     buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
     buf_set_keymap('n', '<leader>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
-    buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
-    buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
-    buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
+    buf_set_keymap('n', '<leader>[', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
+    buf_set_keymap('n', '<leader>]', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
+    buf_set_keymap('n', '<leader>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
 
     -- Set some keybinds conditional on server capabilities
     if client.resolved_capabilities.document_formatting then
@@ -267,9 +241,9 @@ lua <<EOF
     -- Set autocommands conditional on server_capabilities
     if client.resolved_capabilities.document_highlight then
       vim.api.nvim_exec([[
-        hi LspReferenceRead cterm=bold ctermbg=red guibg=LightYellow
-        hi LspReferenceText cterm=bold ctermbg=red guibg=LightYellow
-        hi LspReferenceWrite cterm=bold ctermbg=red guibg=LightYellow
+        hi LspReferenceRead cterm=bold ctermbg=green guibg=green
+        hi LspReferenceText cterm=bold ctermbg=green guibg=green
+        hi LspReferenceWrite cterm=bold ctermbg=green guibg=green
         augroup lsp_document_highlight
           autocmd! * <buffer>
           autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
@@ -282,10 +256,10 @@ lua <<EOF
   require'lspinstall'.setup() -- important
 
   local languages = {
-    'angular', 'bash', 'cpp', 'cmake', 'css',
+    'angular', 'bash', 'cpp', 'css', 'yaml',
     'dockerfile', 'graphql', 'html', 'json', 'lua',
     'php', 'python', 'rust', 'terraform',
-    'typescript', 'vim', 'vue', 'yaml'
+    'typescript', 'vim', 'vue'
   }
   local servers = require'lspinstall'.installed_servers()
   for _, language in ipairs(languages) do
@@ -297,3 +271,24 @@ lua <<EOF
     require'lspconfig'[server].setup{ on_attach = on_attach }
   end
 EOF
+
+" Mappings
+" Indent and keep selection
+vnoremap > >gv
+vnoremap < <gv
+
+" w!! Allow saving of files as sudo when I forgot to start vim using sudo.
+cmap w!! w !sudo tee > /dev/null %
+
+" Map FZF
+map <leader>p :Files<cr>
+map <leader>h :History<cr>
+map <leader>b :Buffers<cr>
+map <leader>g :Rg<cr>
+vnoremap <space>* "zy<Esc>:Rg <C-R>z<CR>
+
+" Completion-nvim
+" Use <Tab> and <S-Tab> to navigate through popup menu
+inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+inoremap <expr> <C-Space> completion#trigger_completion()
