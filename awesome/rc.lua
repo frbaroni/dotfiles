@@ -10,6 +10,8 @@ require("awful.autofocus")
 local wibox = require("wibox")
 -- Theme handling library
 local beautiful = require("beautiful")
+local lain          = require("lain")
+local markup = lain.util.markup
 -- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
@@ -48,6 +50,7 @@ end
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
 beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
+theme_font = "Terminus 8"
 
 -- This is used later as the default terminal and editor to run.
 terminal = "alacritty"
@@ -76,9 +79,9 @@ awful.layout.layouts = {
     awful.layout.suit.max.fullscreen,
     awful.layout.suit.magnifier,
     awful.layout.suit.corner.nw,
-    -- awful.layout.suit.corner.ne,
-    -- awful.layout.suit.corner.sw,
-    -- awful.layout.suit.corner.se,
+    awful.layout.suit.corner.ne,
+    awful.layout.suit.corner.sw,
+    awful.layout.suit.corner.se,
 }
 -- }}}
 
@@ -120,9 +123,18 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 -- Keyboard map indicator and switcher
 mykeyboardlayout = awful.widget.keyboardlayout()
 
--- {{{ Wibar
--- Create a textclock widget
-mytextclock = wibox.widget.textclock()
+-- Battery
+batterywidget = wibox.widget.textbox()
+batterywidget:set_text(" | Battery | ")
+batterywidgettimer = timer({ timeout = 5 })
+batterywidgettimer:connect_signal("timeout",
+  function()
+    fh = assert(io.popen("acpi | cut -d, -f 2,3 -", "r"))
+    batterywidget:set_text(" |" .. fh:read("*l") .. " | ")
+    fh:close()
+  end
+)
+batterywidgettimer:start()
 
 -- Create a wibox for each screen and add it
 local taglist_buttons = gears.table.join(
@@ -179,6 +191,70 @@ end
 -- Re-set wallpaper when a screen's geometry changes (e.g. different resolution)
 screen.connect_signal("property::geometry", set_wallpaper)
 
+-- Calendar from copycats
+os.setlocale(os.getenv("LANG")) -- to localize the clock
+local mytextclock = wibox.widget.textclock(markup("#7788af", "%A %d %B ") .. markup("#ab7367", ">") .. markup("#de5e1e", " %H:%M "))
+mycal = lain.widget.cal({
+    attach_to = { mytextclock },
+    notification_preset = {
+        font = "Terminus 10",
+    }
+})
+
+-- CPU all statsc below from copycats
+local cpu = lain.widget.cpu({
+    settings = function()
+        widget:set_markup(markup.fontfg(theme_font, "#e33a6e", cpu_now.usage .. "% "))
+    end
+})
+
+-- Coretemp
+local temp = lain.widget.temp({
+    settings = function()
+        widget:set_markup(markup.fontfg(theme_font, "#f1af5f", coretemp_now .. "°C "))
+    end
+})
+
+-- Battery
+local bat = lain.widget.bat({
+    settings = function()
+        local perc = bat_now.perc ~= "N/A" and bat_now.perc .. "%" or bat_now.perc
+
+        if bat_now.ac_status == 1 then
+            perc = perc .. " plug"
+        end
+        widget:set_markup(markup.fontfg(theme_font, "#404099", perc .. " "))
+    end
+})
+
+-- ALSA volume
+volume = lain.widget.alsa({
+    settings = function()
+        if volume_now.status == "off" then
+            volume_now.level = volume_now.level .. "M"
+        end
+
+        widget:set_markup(markup.fontfg(theme_font, "#7493d2", volume_now.level .. "% "))
+    end
+})
+
+-- Net
+local netdowninfo = wibox.widget.textbox()
+local netupinfo = lain.widget.net({
+    settings = function()
+        widget:set_markup(markup.fontfg(theme_font, "#e54c62", net_now.sent .. " "))
+        netdowninfo:set_markup(markup.fontfg(theme_font, "#87af5f", net_now.received .. " "))
+    end
+})
+
+-- MEM
+local memory = lain.widget.mem({
+    settings = function()
+        widget:set_markup(markup.fontfg(theme_font, "#e0da37", mem_now.used .. "M "))
+    end
+})
+
+
 awful.screen.connect_for_each_screen(function(s)
     -- Wallpaper
     set_wallpaper(s)
@@ -225,6 +301,12 @@ awful.screen.connect_for_each_screen(function(s)
         s.mytasklist, -- Middle widget
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
+            batterywidget,
+            netdowninfo,
+            netupinfo.widget,
+            volume.widget,
+            memory.widget,
+            cpu.widget,
             mykeyboardlayout,
             wibox.widget.systray(),
             mytextclock,
@@ -342,7 +424,7 @@ globalkeys = gears.table.join(
     -- Menubar
     awful.key({ modkey }, "z", function() menubar.show() end,
               {description = "show the menubar", group = "launcher"}),
--- Custom
+    -- Custom
       awful.key({ modkey,           }, "p", function () awful.spawn.with_shell("echo 'sh ~/.screenlayout/$(zenity --timeout 3 --info $(for f in `ls ~/.screenlayout`; do echo \"--extra-button $f\"; done) --text Select)' > /tmp/chooser && bash /tmp/chooser") end, {description = "arandr", group = "launcher"}),
 
       awful.key({ modkey,           }, "x", function () awful.spawn("dmenu_run") end,
@@ -351,15 +433,24 @@ globalkeys = gears.table.join(
       awful.key({ modkey }, ".", function () awful.spawn("i3lock") end,
                  {description = "i3lock", group = "launcher"}),
 
-      awful.key({ }, "Print", function () awful.util.spawn("flatpak run org.flameshot.Flameshot launcher") end,
+      awful.key({ }, "Print", function () awful.util.spawn("flameshoot") end,
                  {description = "flameshot", group = "launcher"}),
 
       awful.key({ }, "XF86AudioPlay", function () awful.util.spawn("mpc toggle") end),
       awful.key({ }, "XF86AudioNext", function () awful.util.spawn("mpc next") end),
       awful.key({ }, "XF86AudioPrev", function () awful.util.spawn("mpc prev") end),
-      awful.key({ }, "XF86AudioRaiseVolume", function () awful.util.spawn("pactl set-sink-volume @DEFAULT_SINK@ +5%") end),
-      awful.key({ }, "XF86AudioLowerVolume", function () awful.util.spawn("pactl set-sink-volume @DEFAULT_SINK@ -5%") end),
-      awful.key({ }, "XF86AudioMute", function () awful.util.spawn("pactl set-sink-mute @DEFAULT_SINK@ toggle") end)
+      awful.key({ }, "XF86AudioRaiseVolume", function ()
+            os.execute(string.format("amixer -q set %s 1%%+", volume.channel))
+            volume.update()
+      end),
+      awful.key({ }, "XF86AudioLowerVolume", function ()
+            os.execute(string.format("amixer -q set %s 1%%-", volume.channel))
+            volume.update()
+      end),
+      awful.key({ }, "XF86AudioMute", function ()
+            os.execute(string.format("amixer -q set %s toggle", volume.togglechannel or volume.channel))
+            volume.update()
+      end)
 
 )
 
@@ -588,18 +679,28 @@ client.connect_signal("request::titlebars", function(c)
     }
 end)
 
--- Enable sloppy focus, so that focus follows mouse.
-client.connect_signal("mouse::enter", function(c)
-    c:emit_signal("request::activate", "mouse_enter", {raise = false})
-end)
+  -- Enable sloppy focus, so that focus follows mouse.
+  client.connect_signal("mouse::enter", function(c)
+      c:emit_signal("request::activate", "mouse_enter", {raise = false})
+  end)
 
-client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
+  client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
 --
 beautiful.useless_gap = 4
 beautiful.border_focus = "#00ff00"
-awful.spawn("variety --resume")
-awful.spawn("nm-applet")
-awful.spawn("slack")
-awful.spawn("compton -i 0.82")
+
+local function run_once(cmd_arr)
+    for _, cmd in ipairs(cmd_arr) do
+        awful.spawn.with_shell(string.format("pgrep -u $USER -fx '%s' > /dev/null || (%s)", cmd, cmd))
+    end
+end
+
+run_once({
+   "variety --resume",
+   "nm-applet",
+   "slack",
+   "compton -i 0.82",
+   "/usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1",
+})
