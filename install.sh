@@ -63,6 +63,7 @@ ensure_symlink ${DOTFILES}/awesome ${DISTRO_HOME}/.config/awesome
 ensure_symlink ${DOTFILES}/vim ${DISTRO_HOME}/.config/nvim
 ensure_symlink ${DOTFILES}/vim ${DISTRO_HOME}/.vim
 ensure_symlink ${DOTFILES}/zsh/zshrc ${DISTRO_HOME}/.zshrc
+ensure_symlink ${DOTFILES}/variety/Favorites ${DISTRO_HOME}/.config/variety/Favorites
 
 ensure_symlink ${DOTFILES}/zsh/zshrc ${DISTRO_HOME}/.zshrc
 

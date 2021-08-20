@@ -7,6 +7,7 @@ endif
 syntax on
 filetype indent on
 let mapleader=" "
+set shiftwidth=2
 set encoding=utf-8
 set backupdir=~/.vim_backup/
 set undodir=~/.vim_undo/
