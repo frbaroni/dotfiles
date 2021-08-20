@@ -68,7 +68,8 @@ local function factory(args)
             strx = x
             if x == today then
                 if x < 10 then x = " " .. x end
-                strx = markup.bold(markup.color(cal.notification_preset.bg, cal.notification_preset.fg, x) .. " ")
+                -- strx = markup.bold(markup.color(cal.notification_preset.bg, cal.notification_preset.fg, x) .. " ")
+                strx = markup.bold(x .. " ")
             end
             strx = string.format("%s%s", string.rep(" ", 3 - tostring(x):len()), strx)
             notifytable[#notifytable+1] = string.format("%-4s%s", strx, (x+st_day)%7==0 and x ~= mth_days and "\n" or "")

@@ -122,3 +122,4 @@ export EDITOR='nvim'
 
 alias ls=exa
 alias cat=bat
+alias finalet='tmuxp load ~/finale.tmuxp.yaml'

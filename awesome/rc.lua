@@ -55,7 +55,7 @@ beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
 theme_font = "Terminus 8"
 
 -- This is used later as the default terminal and editor to run.
-terminal = "alacritty"
+terminal = "kitty"
 editor = os.getenv("EDITOR") or "nano"
 editor_cmd = terminal .. " -e " .. editor
 
@@ -257,6 +257,8 @@ local memory = lain.widget.mem({
     end
 })
 
+local mysystray = wibox.widget.systray()
+
 
 awful.screen.connect_for_each_screen(function(s)
     -- Wallpaper
@@ -311,7 +313,7 @@ awful.screen.connect_for_each_screen(function(s)
             memory.widget,
             cpu.widget,
             mykeyboardlayout,
-            wibox.widget.systray(),
+            mysystray,
             mytextclock,
             s.mylayoutbox,
         },
@@ -433,8 +435,8 @@ globalkeys = gears.table.join(
       awful.key({ modkey,           }, "x", function () awful.spawn("dmenu_run") end,
                  {description = "dmenu", group = "launcher"}),
 
-      awful.key({ modkey }, ".", function () awful.spawn("i3lock") end,
-                 {description = "i3lock", group = "launcher"}),
+      awful.key({ modkey }, ".", function () os.execute("bash ~/lock.sh") end,
+                 {description = "lock", group = "launcher"}),
 
       awful.key({ }, "Print", function () awful.util.spawn("flameshoot") end,
                  {description = "flameshot", group = "launcher"}),
@@ -688,7 +690,7 @@ end)
   end)
 
   client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
-client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
+  client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
 --
 beautiful.useless_gap = 4
@@ -704,6 +706,8 @@ run_once({
    "variety --resume",
    "nm-applet",
    "slack",
+   "flatpak run me.kozec.syncthingtk --minimized",
+   "workrave",
    "compton -i 0.82",
-   "/usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1",
+   "/usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1"
 })
