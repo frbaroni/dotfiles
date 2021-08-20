@@ -701,6 +701,7 @@ run_once({
    "variety --resume",
    "nm-applet",
    "slack",
+   "flatpak run me.kozec.syncthingtk",
    "compton -i 0.82",
    "/usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1",
 })
