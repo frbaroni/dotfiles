@@ -5,7 +5,7 @@ USER_NAME=${USER}
 USER_GROUP=${GID}
 DISTRO_HOME=$(realpath ~)
 FRB_HOME="/frb"
-DOTFILES="${FRB_HOME}/Sync/dotfiles"
+DOTFILES=$(realpath .)
 DISTRO=$(awk -F= '/^NAME/{print $2}' /etc/os-release | tr -d '"')
 VARIANT=$(awk -F= '/^VARIANT=/{print $2}' /etc/os-release | tr -d '"')
 
@@ -72,11 +72,11 @@ if [[ -d ${FRB_HOME} ]]; then
     echo "@reboot ${FRB_HOME}/Sync/borgbackup/cron.sh";
     echo "0 1,7,13,19 * * * ${FRB_HOME}/BackupBT3/cron.sh";
   } | crontab -
-  ensure_symlink ${DOTFILES}/zsh/zshrc ${DISTRO_HOME}/.zshrc
   echo "Creating links on /frb"
   ensure_symlink ${FRB_HOME}/VMNetwork ${DISTRO_HOME}/VMNetwork
   ensure_symlink ${FRB_HOME}/Fotos ${DISTRO_HOME}/Fotos
   ensure_symlink ${FRB_HOME}/Fotos ${DISTRO_HOME}/Camera
+  ensure_symlink ${FRB_HOME}/KeePass ${DISTRO_HOME}/Keepass
   ensure_symlink ${FRB_HOME}/Sync ${DISTRO_HOME}/Sync
   ensure_symlink ${FRB_HOME}/p ${DISTRO_HOME}/p
 fi
@@ -89,9 +89,8 @@ ensure_symlink ${DOTFILES}/kitty ${DISTRO_HOME}/.config/kitty
 ensure_symlink ${DOTFILES}/zsh/zshrc ${DISTRO_HOME}/.zshrc
 mkdir -p ~/.config/variety
 ensure_symlink ${DOTFILES}/variety/Favorites ${DISTRO_HOME}/.config/variety/Favorites
-ensure_symlink ${DOTFILES}/ ${DISTRO_HOME}/dotfiles
 ensure_symlink ${DOTFILES}/zsh/zshrc ${DISTRO_HOME}/.zshrc
-ensure_symlink ${FRB_HOME}/KeePass ${DISTRO_HOME}/Keepass
+ensure_symlink ${DOTFILES}/ ${DISTRO_HOME}/dotfiles
 
 for dir in "${CREATE_DIRS}";
 do

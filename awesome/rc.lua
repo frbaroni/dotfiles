@@ -578,6 +578,7 @@ awful.rules.rules = {
           "Arandr",
           "Blueman-manager",
           "Gpick",
+          "KeePassXC",
           "Kruler",
           "MessageWin",  -- kalarm.
           "Sxiv",
@@ -689,7 +690,7 @@ awful.spawn.with_shell("ps -x | grep activitywatch | cut -f2 -d' ' | xargs kill 
 run_once({
    "nm-applet",
    "variety --resume",
-   "syncthing",
+   "syncthing --no-browser",
    "picom",
    "lxpolkit",
    "~/activitywatch/aw-qt",
