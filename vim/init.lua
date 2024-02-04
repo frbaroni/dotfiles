@@ -8,6 +8,7 @@ vim.opt.ignorecase = true
 vim.opt.autoread = true
 vim.opt.scrolloff = 4
 vim.g.mapleader = " "
+vim.opt.tabstop = 2
 
 local ensure_packer = function()
 	local fn = vim.fn
@@ -95,31 +96,6 @@ require('packer').startup(function(use)
 
 
 	use {
-		'glepnir/dashboard-nvim',
-		config = function()
-			local db = require('dashboard')
-
-			db.custom_center = {
-				{
-					icon = '  ',
-					desc = 'Recently opened files                   ',
-					action = 'Telescope oldfiles',
-				},
-				{
-					icon = '  ',
-					desc = 'Find  File                              ',
-					action = 'Telescope find_files find_command=rg,--hidden,--files',
-				},
-				{
-					icon = '  ',
-					desc = 'Find  word                              ',
-					action = 'Telescope live_grep',
-				},
-			}
-		end
-	}
-
-	use {
 		'NvChad/nvim-colorizer.lua',
 		config = function()
 			require('colorizer').setup {
@@ -133,13 +109,6 @@ require('packer').startup(function(use)
 		requires = 'kyazdani42/nvim-web-devicons',
 		config = function()
 			require('lualine').setup({})
-		end
-	}
-
-	use {
-		'lewis6991/gitsigns.nvim',
-		config = function()
-			require('gitsigns').setup({})
 		end
 	}
 
@@ -175,6 +144,21 @@ require('packer').startup(function(use)
 	}
 
 	use {
+		'stevearc/overseer.nvim',
+		config = function()
+			require('overseer').setup()
+		end
+	}
+
+  use {
+		'tpope/vim-dadbod'
+	}
+
+  use {
+		'kristijanhusak/vim-dadbod-ui'
+	}
+
+	use {
 		'nvim-telescope/telescope.nvim'
 	}
 
@@ -184,7 +168,7 @@ require('packer').startup(function(use)
 	end
 end)
 
-local gitsigns = require('gitsigns')
+-- local gitsigns = require('gitsigns')
 local wk = require('which-key')
 local neotest = require('neotest')
 local telescope = require('telescope.builtin')
@@ -201,13 +185,20 @@ wk.register({
 		h = { telescope.help_tags, 'Find Helptags' },
 		c = { telescope.commands, 'Find Commands' },
 	},
-	['gf'] = { telescope.grep_string, 'Find Visual', mode = 'v' },
 	["<leader>g"] = {
-		name = 'Git',
-		g = { vim.cmd.Git, 'Open' },
-		p = { gitsigns.preview_hunk, 'Preview' },
-		s = { gitsigns.stage_hunk, 'Stage' },
-		u = { gitsigns.reset_hunk, 'Stage' },
+		vim.cmd.Git, 'Open'
+		-- name = 'Git',
+		-- g = { vim.cmd.Git, 'Open' },
+		-- p = { gitsigns.preview_hunk, 'Preview' },
+		-- s = { gitsigns.stage_hunk, 'Stage' },
+		-- u = { gitsigns.reset_hunk, 'Stage' },
+	},
+	["<leader>o"] = {
+		name = 'Overseer',
+		o = { "<cmd>OverseerTaskAction<cr>" , 'Run' },
+		n = { "<cmd>OverseerBuild<cr>" , 'New' },
+		w = { "<cmd>OverseerSaveBundle<cr>" , 'Save' },
+		l = { "<cmd>OverseerLoadBundle<cr>" , 'Load' },
 	},
 	["<leader>x"] = {
 		name = 'Trouble',
@@ -235,6 +226,8 @@ wk.register({
 	[']d'] = { vim.diagnostic.goto_prev, 'Diagnostic Prev' },
 	['gd'] = { telescope.lsp_definitions, 'Definition' },
 	['gr'] = { telescope.lsp_references, 'References' },
+	['ga'] = { vim.lsp.buf.code_action, 'Actions' },
+	['gf'] = { telescope.grep_string, 'Find Visual', mode = 'v' },
 	['K'] = { vim.lsp.buf.hover, 'Show Hover' },
 	['<C-space>'] = { "<C-\\><C-n>", 'Exit Terminal mode', mode = 't' },
 }, {})
@@ -263,8 +256,7 @@ lspconfig.lua_ls.setup {
 	},
 }
 
-lspconfig.denols.setup {
-	root_dir = lspconfig.util.root_pattern("deno.json", "deno.jsonc"),
+lspconfig.biome.setup {
 }
 
 lspconfig.tsserver.setup {

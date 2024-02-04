@@ -677,7 +677,7 @@ client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_n
 -- }}}
 
 beautiful.useless_gap = 4
-beautiful.border_focus = "#00ff00"
+beautiful.border_focus = "#00ffff"
 
 local function run_once(cmd_arr)
     for _, cmd in ipairs(cmd_arr) do
