@@ -9,7 +9,7 @@ DOTFILES=$(realpath .)
 DISTRO=$(awk -F= '/^NAME/{print $2}' /etc/os-release | tr -d '"')
 VARIANT=$(awk -F= '/^VARIANT=/{print $2}' /etc/os-release | tr -d '"')
 
-SHARED_PACKAGES='git xclip tmux cargo awesome kitty arandr i3lock peek gamemode zsh variety mpc zenity fzf pavucontrol htop xfce4* flatpak ripgrep steam'
+SHARED_PACKAGES='git xclip tmux cargo awesome kitty arandr i3lock peek gamemode zsh variety mpc zenity fzf pavucontrol htop xfce4* flatpak ripgrep steam cmake make'
 ARCH_PACKAGES='virt-manager qemu cronie nodejs borg'
 DEBIAN_PACKAGES='python3-pip'
 FEDORA_PACKAGES='python3-pip cronie-anacron neovim python3-neovim npm nodejs network-manager-applet picom xkill syncthing borgbackup lxpolkit podman-docker podman-compose vivaldi-stable gnome-font-viewer'
@@ -67,10 +67,10 @@ echo "Installing Cargo packages"
 
 if [[ -d ${FRB_HOME} ]]; then
   echo "Creating borg cronjob"
-  crontab -l | grep -ve "borgbackup\|BackupBT3" | {
+  crontab -l | grep -ve "borgbackup\|bt3" | {
     cat;
     echo "@reboot ${FRB_HOME}/Sync/borgbackup/cron.sh";
-    echo "0 1,7,13,19 * * * ${FRB_HOME}/BackupBT3/cron.sh";
+    echo "26 */4 * * * ${FRB_HOME}/p/bt3/server/cron.sh";
   } | crontab -
   echo "Creating links on /frb"
   ensure_symlink ${FRB_HOME}/VMNetwork ${DISTRO_HOME}/VMNetwork

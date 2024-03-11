@@ -78,12 +78,39 @@ require('packer').startup(function(use)
 			-- Snippets
 			{ 'L3MON4D3/LuaSnip' },
 			{ 'rafamadriz/friendly-snippets' },
-		}
+		},
+		config = function()
+			local cmp = require('cmp')
+
+			cmp.setup({
+				mapping = cmp.mapping.preset.insert({
+					-- Scroll up and down in the completion documentation
+					['<C-u>'] = cmp.mapping.scroll_docs(-4),
+					['<C-d>'] = cmp.mapping.scroll_docs(4),
+				})
+			})
+		end
 	}
 
 	use {
 		'nvim-treesitter/nvim-treesitter',
 		run = ':TSUpdate',
+	}
+
+	use {
+		'andersevenrud/nvim_context_vt',
+		config = function()
+			require('nvim_context_vt').setup({})
+		end
+	}
+
+
+	use {
+		'wellle/context.vim',
+		config = function()
+			vim.g.context_enabled = 3
+			-- let g:context_enabled = 3
+		end
 	}
 
 	use {
@@ -162,13 +189,37 @@ require('packer').startup(function(use)
 		'nvim-telescope/telescope.nvim'
 	}
 
+	use {
+		'nvim-telescope/telescope-fzf-native.nvim',
+		run = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build',
+		config = function()
+			require('telescope').load_extension('fzf')
+		end
+	}
+
+	use {'stevearc/dressing.nvim'}
+
+	use {
+		'lewis6991/gitsigns.nvim',
+		config = function()
+			require('gitsigns').setup()
+		end
+	}
+
+	use {
+		'xiyaowong/transparent.nvim',
+		config = function()
+			require("transparent").setup({
+			})
+		end
+	}
 
 	if packer_bootstrap then
 		require('packer').sync()
 	end
 end)
 
--- local gitsigns = require('gitsigns')
+local gitsigns = require('gitsigns')
 local wk = require('which-key')
 local neotest = require('neotest')
 local telescope = require('telescope.builtin')
@@ -186,19 +237,19 @@ wk.register({
 		c = { telescope.commands, 'Find Commands' },
 	},
 	["<leader>g"] = {
-		vim.cmd.Git, 'Open'
-		-- name = 'Git',
-		-- g = { vim.cmd.Git, 'Open' },
-		-- p = { gitsigns.preview_hunk, 'Preview' },
-		-- s = { gitsigns.stage_hunk, 'Stage' },
-		-- u = { gitsigns.reset_hunk, 'Stage' },
+		name = 'Git',
+		g = { vim.cmd.Git, 'Open' },
+		p = { gitsigns.preview_hunk, 'Preview' },
+		s = { gitsigns.stage_hunk, 'Stage' },
+		u = { gitsigns.reset_hunk, 'Stage' },
 	},
 	["<leader>o"] = {
 		name = 'Overseer',
 		o = { "<cmd>OverseerTaskAction<cr>" , 'Run' },
 		n = { "<cmd>OverseerBuild<cr>" , 'New' },
 		w = { "<cmd>OverseerSaveBundle<cr>" , 'Save' },
-		l = { "<cmd>OverseerLoadBundle<cr>" , 'Load' },
+		l = { "<cmd>OverseerLoadBundle!<cr>" , 'Load' },
+		t = { "<cmd>OverseerToggle<cr>" , 'Toggle' },
 	},
 	["<leader>x"] = {
 		name = 'Trouble',
@@ -269,3 +320,18 @@ vim.diagnostic.config({
 })
 
 lsp.setup()
+
+-- Triger `autoread` when files changes on disk
+-- https://unix.stackexchange.com/questions/149209/refresh-changed-content-of-file-opened-in-vim/383044#383044
+-- https://vi.stackexchange.com/questions/13692/prevent-focusgained-autocmd-running-in-command-line-editing-mode
+vim.api.nvim_create_autocmd({'FocusGained', 'BufEnter', 'CursorHold', 'CursorHoldI'}, {
+  pattern = '*',
+  command = "if mode() !~ '\v(c|r.?|!|t)' && getcmdwintype() == '' | checktime | endif",
+})
+
+-- Notification after file change
+-- https://vi.stackexchange.com/questions/13091/autocmd-event-for-autoread
+vim.api.nvim_create_autocmd({'FileChangedShellPost'}, {
+  pattern = '*',
+  command = "echohl WarningMsg | echo 'File changed on disk. Buffer reloaded.' | echohl None",
+})

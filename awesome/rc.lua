@@ -576,6 +576,7 @@ awful.rules.rules = {
         },
         class = {
           "Arandr",
+          "MEGAMU",
           "Blueman-manager",
           "Gpick",
           "KeePassXC",
