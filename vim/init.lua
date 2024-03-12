@@ -72,49 +72,7 @@ require('packer').startup(function(use)
 			{ 'hrsh7th/cmp-buffer' },
 			{ 'hrsh7th/cmp-path' },
 			{ 'hrsh7th/cmp-nvim-lsp' },
-		},
-		config = function()
-			local lsp_zero = require('lsp-zero')
-
-			lsp_zero.on_attach(function(client, bufnr)
-				-- see :help lsp-zero-keybindings
-				-- to learn the available actions
-				lsp_zero.default_keymaps({buffer = bufnr})
-			end)
-
-			--- if you want to know more about lsp-zero and mason.nvim
-			--- read this: https://github.com/VonHeikemen/lsp-zero.nvim/blob/v3.x/doc/md/guides/integrate-with-mason-nvim.md
-			require('mason').setup({})
-			require('mason-lspconfig').setup({
-				ensure_installed = {},
-				handlers = {
-					lsp_zero.default_setup,
-					lua_ls = function()
-						local lua_opts = lsp_zero.nvim_lua_ls()
-						require('lspconfig').lua_ls.setup(lua_opts)
-					end,
-				}
-			})
-
-			local cmp = require('cmp')
-			local cmp_format = lsp_zero.cmp_format()
-
-			cmp.setup({
-				formatting = cmp_format,
-				mapping = cmp.mapping.preset.insert({
-					-- scroll up and down the documentation window
-					['<C-u>'] = cmp.mapping.scroll_docs(-4),
-					['<C-d>'] = cmp.mapping.scroll_docs(4),
-				}),
-			})
---			lspconfig.biome.setup {
---				root_dir = lspconfig.util.root_pattern("deno.json", "deno.jsonc")
---			}
---
---			lspconfig.tsserver.setup {
---				root_dir = lspconfig.util.root_pattern("package.json"),
---			}
-		end
+		}
 	}
 
 	use {
@@ -202,11 +160,11 @@ require('packer').startup(function(use)
 		end
 	}
 
-  use {
+	use {
 		'tpope/vim-dadbod'
 	}
 
-  use {
+	use {
 		'kristijanhusak/vim-dadbod-ui'
 	}
 
@@ -222,7 +180,7 @@ require('packer').startup(function(use)
 		end
 	}
 
-	use {'stevearc/dressing.nvim'}
+	use { 'stevearc/dressing.nvim' }
 
 	use {
 		'lewis6991/gitsigns.nvim',
@@ -270,11 +228,11 @@ wk.register({
 	},
 	["<leader>o"] = {
 		name = 'Overseer',
-		o = { "<cmd>OverseerTaskAction<cr>" , 'Run' },
-		n = { "<cmd>OverseerBuild<cr>" , 'New' },
-		w = { "<cmd>OverseerSaveBundle<cr>" , 'Save' },
-		l = { "<cmd>OverseerLoadBundle!<cr>" , 'Load' },
-		t = { "<cmd>OverseerToggle<cr>" , 'Toggle' },
+		o = { "<cmd>OverseerTaskAction<cr>", 'Run' },
+		n = { "<cmd>OverseerBuild<cr>", 'New' },
+		w = { "<cmd>OverseerSaveBundle<cr>", 'Save' },
+		l = { "<cmd>OverseerLoadBundle!<cr>", 'Load' },
+		t = { "<cmd>OverseerToggle<cr>", 'Toggle' },
 	},
 	["<leader>x"] = {
 		name = 'Trouble',
@@ -311,14 +269,67 @@ wk.register({
 -- Triger `autoread` when files changes on disk
 -- https://unix.stackexchange.com/questions/149209/refresh-changed-content-of-file-opened-in-vim/383044#383044
 -- https://vi.stackexchange.com/questions/13692/prevent-focusgained-autocmd-running-in-command-line-editing-mode
-vim.api.nvim_create_autocmd({'FocusGained', 'BufEnter', 'CursorHold', 'CursorHoldI'}, {
-  pattern = '*',
-  command = "if mode() !~ '\v(c|r.?|!|t)' && getcmdwintype() == '' | checktime | endif",
+vim.api.nvim_create_autocmd({ 'FocusGained', 'BufEnter', 'CursorHold', 'CursorHoldI' }, {
+	pattern = '*',
+	command = "if mode() !~ '\v(c|r.?|!|t)' && getcmdwintype() == '' | checktime | endif",
 })
 
 -- Notification after file change
 -- https://vi.stackexchange.com/questions/13091/autocmd-event-for-autoread
-vim.api.nvim_create_autocmd({'FileChangedShellPost'}, {
-  pattern = '*',
-  command = "echohl WarningMsg | echo 'File changed on disk. Buffer reloaded.' | echohl None",
+vim.api.nvim_create_autocmd({ 'FileChangedShellPost' }, {
+	pattern = '*',
+	command = "echohl WarningMsg | echo 'File changed on disk. Buffer reloaded.' | echohl None",
 })
+
+
+-- Mason/LSPZero
+local lsp_zero = require('lsp-zero').preset({})
+
+lsp_zero.on_attach(function(client, bufnr)
+	-- see :help lsp-zero-keybindings
+	-- to learn the available actions
+	lsp_zero.default_keymaps({ buffer = bufnr })
+end)
+
+--- if you want to know more about lsp-zero and mason.nvim
+--- read this: https://github.com/VonHeikemen/lsp-zero.nvim/blob/v3.x/doc/md/guides/integrate-with-mason-nvim.md
+require('mason').setup({})
+require('mason-lspconfig').setup({
+	ensure_installed = {},
+	handlers = {
+		lsp_zero.default_setup
+	}
+})
+
+---
+-- Autocompletion config
+---
+local cmp = require('cmp')
+local cmp_action = lsp_zero.cmp_action()
+
+cmp.setup({
+  mapping = cmp.mapping.preset.insert({
+    -- `Enter` key to confirm completion
+    ['<CR>'] = cmp.mapping.confirm({select = false}),
+
+    -- Ctrl+Space to trigger completion menu
+    ['<C-Space>'] = cmp.mapping.complete(),
+
+    -- Navigate between snippet placeholder
+    ['<C-f>'] = cmp_action.luasnip_jump_forward(),
+    ['<C-b>'] = cmp_action.luasnip_jump_backward(),
+
+    -- Scroll up and down in the completion documentation
+    ['<C-u>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-d>'] = cmp.mapping.scroll_docs(4),
+  })
+})
+
+lsp_zero.setup()
+--			lspconfig.biome.setup {
+--				root_dir = lspconfig.util.root_pattern("deno.json", "deno.jsonc")
+--			}
+--
+--			lspconfig.tsserver.setup {
+--				root_dir = lspconfig.util.root_pattern("package.json"),
+--			}
