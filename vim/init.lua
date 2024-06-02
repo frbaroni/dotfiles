@@ -123,37 +123,6 @@ require('packer').startup(function(use)
 	}
 
 	use {
-		"nvim-neotest/neotest",
-		requires = {
-			"nvim-lua/plenary.nvim",
-			"nvim-treesitter/nvim-treesitter",
-			"antoinemadec/FixCursorHold.nvim",
-			"MarkEmmons/neotest-deno",
-			"haydenmeade/neotest-jest",
-			"thenbe/neotest-playwright",
-		},
-		config = function()
-			require('neotest').setup({
-				adapters = {
-					require('neotest-deno'),
-					require('neotest-jest')({
-						jestCommand = "npm test --",
-						cwd = function(path)
-							return vim.fn.getcwd()
-						end,
-					}),
-					require("neotest-playwright").adapter({
-						options = {
-							persist_project_selection = true,
-							enable_dynamic_test_discovery = true,
-						}
-					}),
-				}
-			})
-		end
-	}
-
-	use {
 		'stevearc/overseer.nvim',
 		config = function()
 			require('overseer').setup()
@@ -204,10 +173,10 @@ end)
 
 local gitsigns = require('gitsigns')
 local wk = require('which-key')
-local neotest = require('neotest')
 local telescope = require('telescope.builtin')
 
 wk.register({
+	["<Esc>"] = { "<cmd>noh<CR><Esc>", "Clear Search Highlight" },
 	["<leader>f"] = {
 		name = 'find',
 		a = { telescope.builtin, 'Find All' },
@@ -224,8 +193,12 @@ wk.register({
 		g = { vim.cmd.Git, 'Open' },
 		p = { gitsigns.preview_hunk, 'Preview' },
 		s = { gitsigns.stage_hunk, 'Stage' },
-		u = { gitsigns.reset_hunk, 'Stage' },
+		u = { gitsigns.reset_hunk, 'Reset' },
+		b = { gitsigns.toggle_current_line_blame, 'Toggle line blame' },
+		l = { function() gitsigns.blame_line{full=true} end, 'Line blame' },
 	},
+	['[g'] = { gitsigns.next_hunk, 'Gitsigns Next' },
+	[']g'] = { gitsigns.prev_hunk, 'Gitsigns Prev' },
 	["<leader>o"] = {
 		name = 'Overseer',
 		o = { "<cmd>OverseerTaskAction<cr>", 'Run' },
@@ -239,12 +212,6 @@ wk.register({
 		x = { "<cmd>TroubleToggle<cr>", 'Toggle Trouble' },
 		w = { "<cmd>TroubleToggle workspace_diagnostics<cr>", 'Workspace Trouble' },
 		d = { "<cmd>TroubleToggle document_diagnostics<cr>", 'Document Trouble' },
-	},
-	["<leader>t"] = {
-		name = 'Neotest',
-		n = { function() neotest.run.run() end, 'Test nearest' },
-		f = { function() neotest.run.run(vim.fn.expand("%")) end, 'Test file' },
-		d = { function() neotest.run.run({ strategy = "dap" }) end, 'Debug nearest' },
 	},
 	['<leader>d'] = { vim.diagnostic.open_float, 'Show Diagnostics' },
 	["<leader>c"] = {
@@ -325,11 +292,12 @@ cmp.setup({
   })
 })
 
+local lspconfig = require('lspconfig')
 lsp_zero.setup()
---			lspconfig.biome.setup {
---				root_dir = lspconfig.util.root_pattern("deno.json", "deno.jsonc")
---			}
---
---			lspconfig.tsserver.setup {
---				root_dir = lspconfig.util.root_pattern("package.json"),
---			}
+			lspconfig.biome.setup {
+				root_dir = lspconfig.util.root_pattern("deno.json", "deno.jsonc")
+			}
+
+			lspconfig.tsserver.setup {
+				root_dir = lspconfig.util.root_pattern("package.json"),
+			}

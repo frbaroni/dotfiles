@@ -142,10 +142,3 @@ export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH:$
 
 [ -f /usr/share/fzf/shell/key-bindings.zsh ] && . /usr/share/fzf/shell/key-bindings.zsh
 
-export DENO_INSTALL="/home/fernando/.deno"
-export PATH="$DENO_INSTALL/bin:$PATH"
-
-# fnm
-export PATH="/home/fernando/.local/share/fnm:$PATH"
-eval "`fnm env`"
-
