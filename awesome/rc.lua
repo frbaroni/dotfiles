@@ -682,11 +682,12 @@ beautiful.border_focus = "#00ffff"
 
 local function run_once(cmd_arr)
     for _, cmd in ipairs(cmd_arr) do
-        awful.spawn.with_shell(string.format("pgrep -u $USER -fx '%s' > /dev/null || (%s)", cmd, cmd))
+        awful.spawn.with_shell(string.format("pkill -fx '%s'; %s", cmd, cmd))
     end
 end
 
 awful.spawn.with_shell("ps -x | grep activitywatch | cut -f2 -d' ' | xargs kill -9")
+
 
 run_once({
    "nm-applet",
