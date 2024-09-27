@@ -9,6 +9,7 @@ vim.opt.autoread = true
 vim.opt.scrolloff = 4
 vim.g.mapleader = " "
 vim.opt.tabstop = 2
+vim.opt.scrollback = -1
 
 local ensure_packer = function()
 	local fn = vim.fn
@@ -88,11 +89,24 @@ require('packer').startup(function(use)
 	}
 
 
+-- 	use {
+-- 		'wellle/context.vim',
+-- 		config = function()
+-- 			vim.g.context_enabled = 0
+-- 			-- let g:context_enabled = 3
+-- 		end
+-- 	}
 	use {
-		'wellle/context.vim',
+		"fnune/recall.nvim",
 		config = function()
-			vim.g.context_enabled = 3
-			-- let g:context_enabled = 3
+			require("recall").setup({})
+		end
+	}
+
+	use {
+		"tris203/precognition.nvim",
+		config = function()
+			require('precognition').setup({})
 		end
 	}
 
@@ -174,64 +188,71 @@ end)
 local gitsigns = require('gitsigns')
 local wk = require('which-key')
 local telescope = require('telescope.builtin')
+local recall = require("recall")
 
-wk.register({
-	["<Esc>"] = { "<cmd>noh<CR><Esc>", "Clear Search Highlight" },
-	["<leader>f"] = {
-		name = 'find',
-		a = { telescope.builtin, 'Find All' },
-		r = { telescope.oldfiles, 'Find Recent' },
-		f = { telescope.find_files, 'Find Files' },
-		p = { telescope.git_files, 'Find Gitfiles' },
-		g = { telescope.live_grep, 'Find Grep' },
-		b = { telescope.buffers, 'Find Buffers' },
-		h = { telescope.help_tags, 'Find Helptags' },
-		c = { telescope.commands, 'Find Commands' },
-	},
-	["<leader>g"] = {
-		name = 'Git',
-		g = { vim.cmd.Git, 'Open' },
-		p = { gitsigns.preview_hunk, 'Preview' },
-		s = { gitsigns.stage_hunk, 'Stage' },
-		u = { gitsigns.reset_hunk, 'Reset' },
-		b = { gitsigns.toggle_current_line_blame, 'Toggle line blame' },
-		l = { function() gitsigns.blame_line{full=true} end, 'Line blame' },
-	},
-	['[g'] = { gitsigns.next_hunk, 'Gitsigns Next' },
-	[']g'] = { gitsigns.prev_hunk, 'Gitsigns Prev' },
-	["<leader>o"] = {
-		name = 'Overseer',
-		o = { "<cmd>OverseerTaskAction<cr>", 'Run' },
-		n = { "<cmd>OverseerBuild<cr>", 'New' },
-		w = { "<cmd>OverseerSaveBundle<cr>", 'Save' },
-		l = { "<cmd>OverseerLoadBundle!<cr>", 'Load' },
-		t = { "<cmd>OverseerToggle<cr>", 'Toggle' },
-	},
-	["<leader>x"] = {
-		name = 'Trouble',
-		x = { "<cmd>TroubleToggle<cr>", 'Toggle Trouble' },
-		w = { "<cmd>TroubleToggle workspace_diagnostics<cr>", 'Workspace Trouble' },
-		d = { "<cmd>TroubleToggle document_diagnostics<cr>", 'Document Trouble' },
-	},
-	['<leader>d'] = { vim.diagnostic.open_float, 'Show Diagnostics' },
-	["<leader>c"] = {
-		name = 'Lsp Change',
-		f = { vim.lsp.buf.format, 'Format' },
-		a = { vim.lsp.buf.code_action, 'Actions' },
-		r = { vim.lsp.buf.rename, 'Rename' },
-	},
-	['<C-h>'] = { vim.lsp.buf.signature_help, 'Signature Help', mode = 'i' },
-	['<C-j>'] = { "<cmd>cn<cr>", "Quickfix Next", },
-	['<C-k>'] = { "<cmd>cp<cr>", "Quickfix Prev", },
-	['[d'] = { vim.diagnostic.goto_next, 'Diagnostic Next' },
-	[']d'] = { vim.diagnostic.goto_prev, 'Diagnostic Prev' },
-	['gd'] = { telescope.lsp_definitions, 'Definition' },
-	['gr'] = { telescope.lsp_references, 'References' },
-	['ga'] = { vim.lsp.buf.code_action, 'Actions' },
-	['gf'] = { telescope.grep_string, 'Find Visual', mode = 'v' },
-	['K'] = { vim.lsp.buf.hover, 'Show Hover' },
-	['<C-space>'] = { "<C-\\><C-n>", 'Exit Terminal mode', mode = 't' },
-}, {})
+wk.add({
+    { "<Esc>", "<cmd>noh<CR><Esc>", desc = "Clear Search Highlight" },
+
+    { "<leader>f", group = "find" },
+    { "<leader>fa", function() telescope.builtin() end, desc = "Find All" },
+    { "<leader>fr", telescope.oldfiles, desc = "Find Recent" },
+    { "<leader>ff", telescope.find_files, desc = "Find Files" },
+    { "<leader>fp", telescope.git_files, desc = "Find Gitfiles" },
+    { "<leader>fg", telescope.live_grep, desc = "Find Grep" },
+    { "<leader>fb", telescope.buffers, desc = "Find Buffers" },
+    { "<leader>fh", telescope.help_tags, desc = "Find Helptags" },
+    { "<leader>fc", telescope.commands, desc = "Find Commands" },
+
+    { "<leader>m", group = "Recall" },
+    { "<leader>mm", recall.toggle, desc = "Toggle" },
+    { "<leader>mn", recall.goto_next, desc = "Next" },
+    { "<leader>mp", recall.goto_prev, desc = "Prev" },
+    { "<leader>mc", recall.clear, desc = "Clear" },
+    { "<leader>ml", ":Telescope recall<CR>", desc = "Telescope" },
+
+    { "<leader>g", group = "Git" },
+    { "<leader>gg", vim.cmd.Git, desc = "Open" },
+    { "<leader>gp", gitsigns.preview_hunk, desc = "Preview" },
+    { "<leader>gs", gitsigns.stage_hunk, desc = "Stage" },
+    { "<leader>gu", gitsigns.reset_hunk, desc = "Reset" },
+    { "<leader>gb", gitsigns.toggle_current_line_blame, desc = "Toggle line blame" },
+    { "<leader>gl", function() gitsigns.blame_line{full=true} end, desc = "Line blame" },
+
+    { "[g", gitsigns.next_hunk, desc = "Gitsigns Next" },
+    { "]g", gitsigns.prev_hunk, desc = "Gitsigns Prev" },
+
+    { "<leader>o", group = "Overseer" },
+    { "<leader>oo", "<cmd>OverseerTaskAction<cr>", desc = "Run" },
+    { "<leader>on", "<cmd>OverseerBuild<cr>", desc = "New" },
+    { "<leader>ow", "<cmd>OverseerSaveBundle<cr>", desc = "Save" },
+    { "<leader>ol", "<cmd>OverseerLoadBundle!<cr>", desc = "Load" },
+    { "<leader>ot", "<cmd>OverseerToggle<cr>", desc = "Toggle" },
+
+    { "<leader>x", group = "Trouble" },
+    { "<leader>xx", "<cmd>TroubleToggle<cr>", desc = "Toggle Trouble" },
+    { "<leader>xw", "<cmd>TroubleToggle workspace_diagnostics<cr>", desc = "Workspace Trouble" },
+    { "<leader>xd", "<cmd>TroubleToggle document_diagnostics<cr>", desc = "Document Trouble" },
+
+    { "<leader>d", vim.diagnostic.open_float, desc = "Show Diagnostics" },
+
+    { "<leader>c", group = "Lsp Change" },
+    { "<leader>cf", vim.lsp.buf.format, desc = "Format" },
+    { "<leader>ca", vim.lsp.buf.code_action, desc = "Actions" },
+    { "<leader>cr", vim.lsp.buf.rename, desc = "Rename" },
+
+    { "<C-h>", vim.lsp.buf.signature_help, desc = "Signature Help", mode = "i" },
+    { "<C-j>", "<cmd>cn<cr>", desc = "Quickfix Next" },
+    { "<C-k>", "<cmd>cp<cr>", desc = "Quickfix Prev" },
+    { "[d", vim.diagnostic.goto_next, desc = "Diagnostic Next" },
+    { "]d", vim.diagnostic.goto_prev, desc = "Diagnostic Prev" },
+
+    { "gd", telescope.lsp_definitions, desc = "Definition" },
+    { "gr", telescope.lsp_references, desc = "References" },
+    { "ga", vim.lsp.buf.code_action, desc = "Actions" },
+    { "gf", telescope.grep_string, desc = "Find Visual", mode = "v" },
+    { "K", vim.lsp.buf.hover, desc = "Show Hover" },
+    { "<C-space>", "<C-\\><C-n>", desc = "Exit Terminal mode", mode = "t" },
+})
 
 -- Triger `autoread` when files changes on disk
 -- https://unix.stackexchange.com/questions/149209/refresh-changed-content-of-file-opened-in-vim/383044#383044

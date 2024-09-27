@@ -12,7 +12,7 @@ VARIANT=$(awk -F= '/^VARIANT=/{print $2}' /etc/os-release | tr -d '"')
 SHARED_PACKAGES='git xclip tmux cargo awesome kitty arandr i3lock peek gamemode zsh variety mpc zenity fzf pavucontrol htop xfce4* flatpak ripgrep steam cmake make'
 ARCH_PACKAGES='virt-manager qemu cronie nodejs borg'
 DEBIAN_PACKAGES='python3-pip'
-FEDORA_PACKAGES='python3-pip cronie-anacron neovim python3-neovim npm nodejs network-manager-applet picom xkill syncthing borgbackup lxpolkit podman-docker podman-compose vivaldi-stable gnome-font-viewer'
+FEDORA_PACKAGES='python3-pip cronie-anacron npm nodejs network-manager-applet picom xkill syncthing borgbackup lxpolkit podman-docker podman-compose vivaldi-stable gnome-font-viewer'
 FLATPAK_PACKAGES='com.discordapp.Discord org.godotengine.Godot org.keepassxc.KeePassXC me.kozec.syncthingtk org.speedcrunch.SpeedCrunch org.flameshot.Flameshot com.uploadedlobster.peek md.obsidian.Obsidian'
 CREATE_DIRS="${DISTRO_HOME}/.vim_undo ${DISTRO_HOME}/.vim_backup ${DISTRO_HOME}/.vim_swap"
 

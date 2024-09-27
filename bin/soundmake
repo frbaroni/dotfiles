@@ -1,0 +1,18 @@
+#!/bin/bash
+
+function papaplay {
+  DEFAULT_SINK=$(pacmd stat | awk -F": " '/Default sink name/ {print $2}')
+  for i in 1 2 3; do
+    paplay --device=$DEFAULT_SINK $1
+  done
+}
+
+function onSuccess {
+  papaplay /usr/share/sounds/Yaru/stereo/complete.oga &
+}
+
+function onError {
+  papaplay /usr/share/sounds/freedesktop/stereo/suspend-error.oga &
+}
+
+make "$@" && onSuccess || onError
