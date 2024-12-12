@@ -410,7 +410,7 @@ local globalkeys = gears.table.join(
     -- Custom
       awful.key({ modkey,           }, "p", function () awful.spawn.with_shell("echo 'sh ~/.screenlayout/$(zenity --timeout 3 --info $(for f in `ls ~/.screenlayout`; do echo \"--extra-button $f\"; done) --text Select)' > /tmp/chooser && bash /tmp/chooser") end, {description = "arandr", group = "launcher"}),
 
-      awful.key({ modkey }, ".", function () awful.util.spawn("i3lock") end,
+      awful.key({ modkey }, ".", function () awful.util.spawn("bash -c '~/dotfiles/lock.sh'") end,
                  {description = "lock", group = "launcher"}),
 
       awful.key({ modkey }, "d", function () awful.util.spawn("vivaldi") end,
@@ -686,8 +686,7 @@ local function run_once(cmd_arr)
     end
 end
 
-awful.spawn.with_shell("ps -x | grep activitywatch | cut -f2 -d' ' | xargs kill -9")
-
+awful.spawn.with_shell([[ps -x | grep -E "activitywatch|aw-qt|aw-server|aw-watcher-window|aw-watcher-afk" | awk '{print $1}' | xargs kill -9]])
 
 run_once({
    "nm-applet",
@@ -696,4 +695,5 @@ run_once({
    "picom",
    "lxpolkit",
    "~/activitywatch/aw-qt",
+   "xautolock -time 1 -locker ~/dotfiles/lock.sh",
 })

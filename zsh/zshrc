@@ -122,17 +122,11 @@ export EDITOR='nvim'
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
 export RIPGREP_CONFIG_PATH=~/.config/ripgrep
 alias finalet='tmuxp load ~/finale.tmuxp.yaml'
 alias ndebug=NODE_OPTIONS='--inspect-brk'
 
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH:$HOME/.cargo/bin:$HOME/.tfenv/bin:$HOME/dotfiles/bin/"
-
-[ -f /usr/share/fzf/shell/key-bindings.zsh ] && . /usr/share/fzf/shell/key-bindings.zsh
-
-
 
 # fnm
 FNM_PATH="/home/fernando/.fnm"
