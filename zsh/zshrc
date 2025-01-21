@@ -134,3 +134,5 @@ if [ -d "$FNM_PATH" ]; then
   export PATH="/home/fernando/.fnm:$PATH"
   eval "`fnm env`"
 fi
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

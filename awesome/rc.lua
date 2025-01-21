@@ -695,5 +695,5 @@ run_once({
    "picom",
    "lxpolkit",
    "~/activitywatch/aw-qt",
-   "xautolock -time 1 -locker ~/dotfiles/lock.sh",
+   "xautolock -time 30 -locker ~/dotfiles/lock.sh",
 })
