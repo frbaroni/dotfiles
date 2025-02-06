@@ -51,7 +51,7 @@ require("lazy").setup({
       "ibhagwan/fzf-lua",
       dependencies = { "nvim-tree/nvim-web-devicons" },
       config = function()
-        require("fzf-lua").setup({'fzf-vim'})
+        require("fzf-lua").setup({'fzf-vim',winopts={fullscreen=true,preview={hidden=false}}})
       end,
     },
     {
@@ -59,33 +59,35 @@ require("lazy").setup({
       build = ":TSUpdate",
       config = function()
         require("nvim-treesitter.configs").setup({
+          modules = { "highlight" },
+          ignore_install = { },
           ensure_installed = { "lua", "python", "javascript", "typescript", "html", "css" },
-          highlight = { enable = true },
+          sync_install = false, -- Install parsers asynchronously (only applied to `ensure_installed`)
+          auto_install = true, -- Automatically install missing parsers when entering a buffer
+          highlight = { enable = true, additional_vim_regex_highlighting = false },
           indent = { enable = true },
         })
       end,
     },
     {
-      "neovim/nvim-lspconfig",
-      config = function()
-        local lspconfig = require("lspconfig")
-        lspconfig.lua_ls.setup({}) -- Lua LSP setup
-        lspconfig.ts_ls.setup({}) -- TypeScript/JavaScript LSP setup
-      end,
+      "williamboman/mason.nvim",
     },
     {
-      "williamboman/mason.nvim",
-      config = function()
-        require("mason").setup()
-      end,
+      "neovim/nvim-lspconfig",
     },
     {
       "williamboman/mason-lspconfig.nvim",
-      dependencies = { "williamboman/mason.nvim", "neovim/nvim-lspconfig" },
       config = function()
+        require("mason").setup()
+
         require("mason-lspconfig").setup({
           ensure_installed = { "lua_ls", "ts_ls" },
+          automatic_installation = true,
         })
+
+        local lspconfig = require("lspconfig")
+        lspconfig.lua_ls.setup({})
+        lspconfig.ts_ls.setup({})
       end,
     },
     {
@@ -97,15 +99,6 @@ require("lazy").setup({
     {
       "kevinhwang91/nvim-bqf",
       ft = "qf",
-      config = function()
-        require("bqf").setup({
-          auto_enable = true,
-          preview = {
-            win_height = 12,
-            win_vheight = 12,
-          },
-        })
-      end,
     },
     {
       "tpope/vim-dadbod",
@@ -133,6 +126,17 @@ require("lazy").setup({
 
         sources = {
           default = { 'lsp', 'path', 'snippets', 'buffer' },
+          providers = {
+            buffer = {
+              opts = {
+                get_bufnrs = function()
+                  return vim.tbl_filter(function(bufnr)
+                    return vim.bo[bufnr].buftype == ''
+                  end, vim.api.nvim_list_bufs())
+                end
+              }
+            }
+          }
         },
       },
       opts_extend = { "sources.default" }
