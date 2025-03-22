@@ -19,3 +19,24 @@ else
   echo "Remote URL format not recognized: $url"
   exit 1
 fi
+#!/bin/bash
+# Convert HTTP Git remote to SSH
+
+remote=${1:-origin}
+url=$(git remote get-url $remote)
+
+# Check if it's already SSH
+if [[ $url == git@* ]]; then
+  echo "Remote $remote is already using SSH"
+  exit 0
+fi
+
+# Convert HTTPS to SSH
+if [[ $url == https://github.com/* ]]; then
+  new_url=${url/https:\/\/github.com\//git@github.com:}
+  git remote set-url $remote $new_url
+  echo "Updated remote $remote to use SSH: $new_url"
+else
+  echo "Remote URL format not recognized: $url"
+  exit 1
+fi
