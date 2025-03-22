@@ -118,6 +118,7 @@ alias v='nvim'
 alias d='deno'
 alias dr='deno run'
 alias dt='deno task'
+alias aider='aider --no-gitignore'
 
 # Environment variables
 export EDITOR='nvim'
