@@ -171,29 +171,6 @@ alias ....='cd ../../..'
 alias finalet='tmuxp load ~/finale.tmuxp.yaml'
 alias ndebug=NODE_OPTIONS='--inspect-brk'
 
-# Function to convert HTTP Git remote to SSH
-git_remote_to_ssh() {
-  local remote=${1:-origin}
-  local url=$(git remote get-url $remote)
-  
-  # Check if it's already SSH
-  if [[ $url == git@* ]]; then
-    echo "Remote $remote is already using SSH"
-    return 0
-  fi
-  
-  # Convert HTTPS to SSH
-  if [[ $url == https://github.com/* ]]; then
-    local new_url=${url/https:\/\/github.com\//git@github.com:}
-    git remote set-url $remote $new_url
-    echo "Updated remote $remote to use SSH: $new_url"
-  else
-    echo "Remote URL format not recognized: $url"
-  fi
-}
-
-# Add an alias for the function
-alias git-use-ssh='git_remote_to_ssh'
 
 # SSH agent setup
 if [[ -f "$HOME/dotfiles/bin/persistent-ssh-agent" ]]; then
