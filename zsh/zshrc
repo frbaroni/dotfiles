@@ -103,6 +103,10 @@ alias pps='podman ps'
 alias pls='podman image ls'
 alias prm='podman rm'
 alias prun='podman run --rm -ti'
+alias dc='docker-compose'
+alias dcu='docker-compose up -d'
+alias dcd='docker-compose down'
+alias dcl='docker-compose logs -f'
 
 # Development shortcuts
 alias y='yarn'
@@ -111,6 +115,9 @@ alias yd='yarn dev'
 alias yb='yarn build'
 alias yt='yarn test'
 alias v='nvim'
+alias d='deno'
+alias dr='deno run'
+alias dt='deno task'
 
 # Environment variables
 export EDITOR='nvim'
@@ -140,6 +147,11 @@ cdUndoKey() {
 }
 zle -N cdUndoKey
 bindkey '^[[1;3A' cdUndoKey
+
+# Quick directory navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
 
 # Load any local customizations
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
