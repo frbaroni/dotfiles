@@ -4,3 +4,4 @@ vim/sessions
 vim/.netrwhist
 variety/Favorites
 .luarc.json
+vim/db_ui/connections.json

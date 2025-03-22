@@ -1,0 +1,147 @@
+#!/usr/bin/env node
+
+const fs = require('fs').promises;
+const { execSync } = require('child_process');
+const readline = require('readline');
+
+let pairCount = 0;
+
+function safeEval(str) {
+    try {
+        // First replace literal null/undefined with their quoted versions
+        const preProcessed = str
+            .replace(/:\s*null\b/g, ': "null"')
+            .replace(/:\s*undefined\b/g, ': "undefined"');
+
+        // Then fix strings containing apostrophes
+        const escaped = preProcessed.replace(/'([^']*?[^\\]'[^']*?)'/g, (match, content) => {
+            // Replace the inner unescaped single quotes with escaped ones
+            const fixed = content.replace(/'/g, "\\'");
+            return `'${fixed}'`;
+        });
+
+        // Create a safe context for eval
+        const context = {
+            undefined: undefined,
+            null: null,
+            true: true,
+            false: false
+        };
+        
+        // Debug the processed string
+        console.log(`\n=== Processed for Eval ===\n${escaped}\n`);
+        
+        const fn = new Function(...Object.keys(context), `return ${escaped}`);
+        const result = fn(...Object.values(context));
+        
+        // Verify we got a valid object/array
+        if (result === null || result === undefined || typeof result !== 'object') {
+            throw new Error('Invalid result type');
+        }
+        
+        // Convert "null"/"undefined" strings back to actual values
+        const processValues = (obj) => {
+            if (Array.isArray(obj)) {
+                return obj.map(processValues);
+            }
+            if (obj !== null && typeof obj === 'object') {
+                const processed = {};
+                for (const [key, value] of Object.entries(obj)) {
+                    processed[key] = value === "null" ? null :
+                                   value === "undefined" ? undefined :
+                                   processValues(value);
+                }
+                return processed;
+            }
+            return obj;
+        };
+
+        return processValues(result);
+    } catch (e) {
+        console.log('Eval failed:', e.message);
+        console.log('Attempted content:', str);
+        throw e;
+    }
+}
+
+function sortObjectKeys(obj) {
+    if (Array.isArray(obj)) {
+        return obj.map(sortObjectKeys);
+    }
+    if (obj !== null && typeof obj === 'object') {
+        return Object.keys(obj).sort().reduce((result, key) => {
+            result[key] = sortObjectKeys(obj[key]);
+            return result;
+        }, {});
+    }
+    return obj;
+}
+
+// Create readline interface for reading stdin
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    terminal: false
+});
+
+async function processJsonContent(content, type, file) {
+    console.log(`=== Original ${type} ===`);
+    console.log(content);
+    
+    try {
+        // Parse JS/JSON structure
+        const parsed = safeEval(content);
+        
+        console.log(`\n=== After JS Eval ${type} ===`);
+        console.log(JSON.stringify(parsed, null, 2));
+        
+        // Sort and save
+        const sorted = JSON.stringify(sortObjectKeys(parsed), null, 2);
+        await fs.writeFile(file, sorted);
+        return true;
+    } catch (error) {
+        console.log(`\n!!! Error processing ${type} !!!`);
+        console.log('Failed content:', content);
+        console.log('Error:', error.message);
+        return false;
+    }
+}
+
+// Process each line
+rl.on('line', async (line) => {
+    const match = line.match(/Expected (.*) to equal (.*)\.?/);
+    if (!match) {
+        console.log(line);
+        return;
+    }
+
+    pairCount++;
+    const expected = match[1];
+    const actual = match[2].replace(/\.\s*$/, '');
+    const expectedFile = `/tmp/diff_${pairCount}_expected`;
+    const actualFile = `/tmp/diff_${pairCount}_actual`;
+
+    try {
+        const expectedSuccess = await processJsonContent(expected, 'Expected', expectedFile);
+        const actualSuccess = await processJsonContent(actual, 'Actual', actualFile);
+
+        if (expectedSuccess && actualSuccess) {
+            // Print original line and diff
+            console.log(line);
+            console.log('--- DIFF ---');
+            console.log(execSync(`git diff --word-diff=color ${expectedFile} ${actualFile}`).toString());
+            console.log('--- END DIFF ---');
+        } else {
+            console.log('!!! Skipping diff due to parsing errors !!!');
+        }
+    } catch (error) {
+        console.error('Error:', error.message);
+    }
+});
+
+// End of input
+rl.on('close', () => {
+    if (pairCount > 0) {
+        console.log('--- END OF OUTPUT ---');
+    }
+});

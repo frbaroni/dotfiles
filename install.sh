@@ -9,7 +9,7 @@ DOTFILES=$(realpath .)
 DISTRO=$(awk -F= '/^NAME/{print $2}' /etc/os-release | tr -d '"')
 VARIANT=$(awk -F= '/^VARIANT=/{print $2}' /etc/os-release | tr -d '"')
 
-SHARED_PACKAGES='git xclip tmux cargo awesome kitty arandr i3lock peek gamemode zsh variety mpc zenity fzf pavucontrol htop xfce4* flatpak ripgrep steam cmake make scrot i3lock xautolock'
+SHARED_PACKAGES='git xclip tmux cargo awesome kitty arandr i3lock peek gamemode zsh variety mpc zenity fzf pavucontrol htop xfce4* flatpak ripgrep steam cmake make scrot i3lock xautolock ssh-askpass'
 ARCH_PACKAGES='virt-manager qemu cronie nodejs borg'
 DEBIAN_PACKAGES='python3-pip'
 FEDORA_PACKAGES='python3-pip cronie-anacron npm nodejs network-manager-applet picom xkill syncthing borgbackup lxpolkit podman-docker podman-compose vivaldi-stable gnome-font-viewer'

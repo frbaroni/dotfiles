@@ -85,9 +85,11 @@ require("lazy").setup({
           automatic_installation = true,
         })
 
-        local lspconfig = require("lspconfig")
-        lspconfig.lua_ls.setup({})
-        lspconfig.ts_ls.setup({})
+        require("mason-lspconfig").setup_handlers {
+            function (server_name)
+                require("lspconfig")[server_name].setup {}
+            end,
+        }
       end,
     },
     {

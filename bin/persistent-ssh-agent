@@ -1,0 +1,40 @@
+#!/bin/bash
+
+SSH_ENV="$HOME/.ssh/environment"
+
+start_ssh_agent() {
+    echo "Starting ssh-agent..."
+    eval "$(ssh-agent -s)" > /dev/null
+    echo "export SSH_AUTH_SOCK=$SSH_AUTH_SOCK" > "$SSH_ENV"
+    echo "export SSH_AGENT_PID=$SSH_AGENT_PID" >> "$SSH_ENV"
+    chmod 600 "$SSH_ENV"
+}
+
+load_ssh_agent() {
+    if [ -f "$SSH_ENV" ]; then
+        source "$SSH_ENV"
+        if ! kill -0 "$SSH_AGENT_PID" 2>/dev/null; then
+            start_ssh_agent
+        fi
+    else
+        start_ssh_agent
+    fi
+}
+
+add_ssh_key() {
+    if ssh-add -l | grep -q 'no identities'; then
+        echo "Adding SSH key using ssh-askpass..."
+        SSH_ASKPASS="/usr/lib/ssh/x11-ssh-askpass" ssh-add $(find "$HOME/.ssh" -maxdepth 1 -type f -name "id_*" ! -name "*.pub") < /dev/null
+    else
+        echo "SSH key already added."
+    fi
+}
+
+# Load SSH agent and add key
+load_ssh_agent
+add_ssh_key
+
+# Ensure SSH_AUTH_SOCK is available for AwesomeWM and its spawned apps
+export SSH_AUTH_SOCK
+export SSH_AGENT_PID
+echo "SSH agent is running with PID: $SSH_AGENT_PID"

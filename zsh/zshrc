@@ -136,3 +136,5 @@ if [ -d "$FNM_PATH" ]; then
 fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+persistent-ssh-agent
