@@ -56,10 +56,14 @@ echo -ne '\e[5 q'
 preexec() { echo -ne '\e[5 q' ;}
 
 # Better vim mode experience
-bindkey -M vicmd '^[[A' history-beginning-search-backward
-bindkey -M vicmd '^[[B' history-beginning-search-forward
-bindkey -M viins '^[[A' history-beginning-search-backward
-bindkey -M viins '^[[B' history-beginning-search-forward
+autoload -U up-line-or-beginning-search
+autoload -U down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey -M vicmd '^[[A' up-line-or-beginning-search
+bindkey -M vicmd '^[[B' down-line-or-beginning-search
+bindkey -M viins '^[[A' up-line-or-beginning-search
+bindkey -M viins '^[[B' down-line-or-beginning-search
 bindkey -M vicmd '?' history-incremental-search-backward
 bindkey -M vicmd '/' history-incremental-search-forward
 
@@ -166,6 +170,30 @@ alias ....='cd ../../..'
 # Keep useful aliases from previous config
 alias finalet='tmuxp load ~/finale.tmuxp.yaml'
 alias ndebug=NODE_OPTIONS='--inspect-brk'
+
+# Function to convert HTTP Git remote to SSH
+git_remote_to_ssh() {
+  local remote=${1:-origin}
+  local url=$(git remote get-url $remote)
+  
+  # Check if it's already SSH
+  if [[ $url == git@* ]]; then
+    echo "Remote $remote is already using SSH"
+    return 0
+  fi
+  
+  # Convert HTTPS to SSH
+  if [[ $url == https://github.com/* ]]; then
+    local new_url=${url/https:\/\/github.com\//git@github.com:}
+    git remote set-url $remote $new_url
+    echo "Updated remote $remote to use SSH: $new_url"
+  else
+    echo "Remote URL format not recognized: $url"
+  fi
+}
+
+# Add an alias for the function
+alias git-use-ssh='git_remote_to_ssh'
 
 # SSH agent setup
 if [[ -f "$HOME/dotfiles/bin/persistent-ssh-agent" ]]; then
