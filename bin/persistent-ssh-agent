@@ -1,19 +1,23 @@
-#!/bin/bash
+#!/usr/bin/env zsh
 
 SSH_ENV="$HOME/.ssh/environment"
 
 start_ssh_agent() {
-    echo "Starting ssh-agent..."
-    eval "$(ssh-agent -s)" > /dev/null
-    echo "export SSH_AUTH_SOCK=$SSH_AUTH_SOCK" > "$SSH_ENV"
-    echo "export SSH_AGENT_PID=$SSH_AGENT_PID" >> "$SSH_ENV"
+    # Kill any existing ssh-agent processes owned by this user
+    pkill -u $USER ssh-agent 2>/dev/null
+    
+    # Start a new agent
+    /usr/bin/ssh-agent > "$SSH_ENV"
     chmod 600 "$SSH_ENV"
+    emulate sh -c "source $SSH_ENV" > /dev/null
 }
 
 load_ssh_agent() {
-    if [ -f "$SSH_ENV" ]; then
-        source "$SSH_ENV"
-        if ! kill -0 "$SSH_AGENT_PID" 2>/dev/null; then
+    if [[ -f "$SSH_ENV" ]]; then
+        emulate sh -c "source $SSH_ENV" > /dev/null
+        
+        # Check if agent is still running
+        if ! ps -p $SSH_AGENT_PID > /dev/null; then
             start_ssh_agent
         fi
     else
@@ -22,19 +26,52 @@ load_ssh_agent() {
 }
 
 add_ssh_key() {
-    if ssh-add -l | grep -q 'no identities'; then
-        echo "Adding SSH key using ssh-askpass..."
-        SSH_ASKPASS="/usr/lib/ssh/x11-ssh-askpass" ssh-add $(find "$HOME/.ssh" -maxdepth 1 -type f -name "id_*" ! -name "*.pub") < /dev/null
-    else
-        echo "SSH key already added."
+    # Check if keys are already loaded
+    ssh-add -l &>/dev/null
+    ssh_status=$?
+    
+    # Status 1 means agent has no identities, 0 means it has some, 2 means agent not running
+    if [[ $ssh_status -eq 1 ]]; then
+        # Find available SSH askpass programs
+        SSH_ASKPASS=""
+        for askpass in "/usr/libexec/openssh/ssh-askpass" "/usr/libexec/openssh/x11-ssh-askpass" "/usr/bin/ssh-askpass" "/usr/lib/ssh/x11-ssh-askpass" "/usr/bin/ksshaskpass"; do
+            if [[ -x "$askpass" ]]; then
+                SSH_ASKPASS="$askpass"
+                break
+            fi
+        done
+        
+        # Export SSH_ASKPASS if found
+        if [[ -n "$SSH_ASKPASS" ]]; then
+            export SSH_ASKPASS
+            # Also set DISPLAY if not already set
+            [[ -z "$DISPLAY" ]] && export DISPLAY=:0
+        fi
+        
+        # Find private keys and add them
+        for keyfile in ~/.ssh/id_*(N.) ~/.ssh/id_*/**/id_*(N.); do
+            if [[ ! $keyfile =~ "\.pub$" ]]; then
+                if [[ -n "$SSH_ASKPASS" ]]; then
+                    # Use askpass for graphical password prompt
+                    SSH_ASKPASS_REQUIRE=force ssh-add "$keyfile" < /dev/null
+                else
+                    # Fall back to terminal prompt
+                    ssh-add "$keyfile"
+                fi
+            fi
+        done
+    elif [[ $ssh_status -eq 2 ]]; then
+        start_ssh_agent
+        add_ssh_key
     fi
 }
 
-# Load SSH agent and add key
+# Load SSH agent
 load_ssh_agent
+
+# Add keys
 add_ssh_key
 
-# Ensure SSH_AUTH_SOCK is available for AwesomeWM and its spawned apps
-export SSH_AUTH_SOCK
-export SSH_AGENT_PID
-echo "SSH agent is running with PID: $SSH_AGENT_PID"
+# Export the environment variables for the current shell
+echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK; export SSH_AUTH_SOCK;"
+echo "SSH_AGENT_PID=$SSH_AGENT_PID; export SSH_AGENT_PID;"

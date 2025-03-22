@@ -687,7 +687,7 @@ local function run_once(cmd_arr)
 end
 
 awful.spawn.with_shell([[ps -x | grep -E "activitywatch|aw-qt|aw-server|aw-watcher-window|aw-watcher-afk" | awk '{print $1}' | xargs kill -9]])
-awful.spawn.with_shell("eval $(ssh-agent -s) && SSH_ASKPASS='/usr/bin/ssh-askpass' ssh-add ~/.ssh/id_*")
+awful.spawn.with_shell("~/dotfiles/bin/persistent-ssh-agent")
 
 run_once({
    "nm-applet",
