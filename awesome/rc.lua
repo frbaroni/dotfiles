@@ -143,17 +143,51 @@ local temp = lain.widget.temp({
     end
 })
 
--- Battery
+-- Battery laptop
 local bat = lain.widget.bat({
     settings = function()
         local perc = bat_now.perc ~= "N/A" and bat_now.perc .. "%" or bat_now.perc
 
         if bat_now.ac_status == 1 then
-            perc = perc .. " plug"
+            perc = "C" .. perc
         end
         widget:set_markup(markup.fontfg(theme_font, "#8080D9", " Bat " .. perc .. " "))
     end
 })
+
+-- Bluetooth battery (Soundbar/Mouse)
+local batbt = wibox.widget.textbox()
+awful.widget.watch("upower -d", 30, function(widget, stdout)
+  local output = ""
+  local color = "#ff00ff"
+  local current = ""
+  local pct = ""
+  local chrg = ""
+  local switchDevice = function(dlabel, dcolor)
+    if current ~= "" then
+      output = output .. markup.fontfg(theme_font, color, current .. ": " .. chrg .. pct .. "% ")
+    end
+    current = dlabel
+    color = dcolor
+    pct = ""
+    chrg = ""
+  end
+  for line in stdout:gmatch("[^\r\n]+") do
+    if line:match("model:") and line:match("SoundCore") then
+      switchDevice("SB", "#80D980")
+    elseif line:match("model:") and line:match("Mouse") then
+      switchDevice("MS", "#D98080")
+    elseif line:match("model:") or line:match("Device:") then
+      switchDevice("", "")
+    elseif line:match("percentage:") then
+      pct = line:match("(%d?%d?%d)%%")
+    elseif line:match("state:") and line:match("charging") and not line:match("discharging") then
+      chrg = "C"
+    end
+  end
+  switchDevice("", "")
+  widget:set_markup(output)
+end, batbt)
 
 -- ALSA volume
 local volume = lain.widget.alsa({
@@ -284,6 +318,7 @@ awful.screen.connect_for_each_screen(function(s)
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
             bat.widget,
+            batbt,
             cpu.widget,
             temp.widget,
             memory.widget,

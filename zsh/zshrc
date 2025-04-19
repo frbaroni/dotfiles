@@ -98,6 +98,7 @@ alias pcr='podman-compose restart'
 
 # Git aliases
 alias gco='git checkout'
+alias gcob='git checkout $(git for-each-ref --sort=-committerdate refs/heads/ --format="%(refname:short)" | head -n 10 | fzf)'
 alias gst='git status'
 alias ga='git add'
 alias gc='git commit'

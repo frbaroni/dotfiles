@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the directory and files to watch
-WATCHED_FILES="${1:-*}"
+WATCHED_FILES=(${1:-*})
 
 # Set the delay (in seconds) after a change is detected
 DELAY="${2:-2}"
@@ -9,18 +9,20 @@ DELAY="${2:-2}"
 # Set the command to run
 COMMAND="${3:-make test}"
 
+# Watch files and trigger the command with a delay
+echo "Watching files: ${WATCHED_FILES[@]} with a delay of $DELAY seconds and running command: $COMMAND"
+
 # Run the initial command
 echo "Initial command run: $COMMAND"
 $COMMAND
 
-# Watch files and trigger the command with a delay
-echo "Watching files: $WATCHED_FILES with a delay of $DELAY seconds and running command: $COMMAND"
-
 while true; do
-    inotifywait -e modify $WATCHED_FILES
+    if ! inotifywait -e modify "${WATCHED_FILES[@]}" 2>/dev/null; then
+        echo "Error: Could not watch specified files. Please check if the files exist."
+        exit 1
+    fi
     echo "Change detected. Waiting for $DELAY seconds before running command..."
     sleep $DELAY
     echo "Running command: $COMMAND"
     $COMMAND
 done
-
