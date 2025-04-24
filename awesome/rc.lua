@@ -16,6 +16,7 @@ local markup = lain.util.markup
 local naughty = require("naughty")
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup")
+local calendar_popup = require("awful.widget.calendar_popup")
 -- Enable hotkeys help widget for VIM and other apps
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
@@ -128,6 +129,13 @@ local mykeyboardlayout = kbdcfg.widget
 -- {{{ Wibar
 -- Create a textclock widget
 local mytextclock = wibox.widget.textclock()
+local month_calendar = awful.widget.calendar_popup.month({
+    position = "tr",
+    opacity = 1,
+    bg = beautiful.bg_normal,
+    font = beautiful.font,
+})
+month_calendar:attach(mytextclock, "tr")
 
 -- CPU all statsc below from copycats
 local cpu = lain.widget.cpu({
