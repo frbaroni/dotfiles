@@ -93,10 +93,198 @@ local myawesomemenu = {
    { "quit", function() awesome.quit() end },
 }
 
-local mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
-                                    { "open terminal", terminal }
-                                  }
-                        })
+-- Function to get all applications from .desktop files with icons
+local function get_applications()
+    local apps = {}
+    local desktop_dirs = {
+        os.getenv("HOME") .. "/.local/share/applications/",
+        "/usr/share/applications/"
+    }
+    
+    -- Function to find icon path
+    local function find_icon(icon_name)
+        if not icon_name then return nil end
+        
+        -- If icon path is absolute
+        if icon_name:sub(1, 1) == "/" and gears.filesystem.file_readable(icon_name) then
+            return icon_name
+        end
+        
+        -- Remove file extension if present
+        local name = icon_name:gsub("%.png$", ""):gsub("%.svg$", ""):gsub("%.xpm$", "")
+        
+        -- Common icon directories
+        local icon_dirs = {
+            "/usr/share/icons/hicolor/scalable/apps/",
+            "/usr/share/icons/hicolor/48x48/apps/",
+            "/usr/share/icons/hicolor/32x32/apps/",
+            "/usr/share/icons/hicolor/24x24/apps/",
+            "/usr/share/icons/hicolor/16x16/apps/",
+            "/usr/share/pixmaps/",
+            "/usr/share/icons/",
+            os.getenv("HOME") .. "/.local/share/icons/hicolor/scalable/apps/",
+            os.getenv("HOME") .. "/.local/share/icons/hicolor/48x48/apps/",
+            os.getenv("HOME") .. "/.local/share/icons/hicolor/32x32/apps/",
+            os.getenv("HOME") .. "/.local/share/icons/hicolor/24x24/apps/",
+            os.getenv("HOME") .. "/.local/share/icons/hicolor/16x16/apps/",
+            os.getenv("HOME") .. "/.local/share/icons/",
+        }
+        
+        -- Check for icon in all directories
+        for _, dir in ipairs(icon_dirs) do
+            local extensions = { "", ".png", ".svg", ".xpm" }
+            for _, ext in ipairs(extensions) do
+                local icon_path = dir .. name .. ext
+                if gears.filesystem.file_readable(icon_path) then
+                    return icon_path
+                end
+            end
+        end
+        
+        -- Try to find icon in current icon theme
+        local icon_theme = "Adwaita" -- Default fallback theme
+        local theme_file = io.open(os.getenv("HOME") .. "/.config/gtk-3.0/settings.ini", "r")
+        if theme_file then
+            for line in theme_file:lines() do
+                if line:match("^gtk%-icon%-theme%-name=") then
+                    icon_theme = line:match("^gtk%-icon%-theme%-name=(.+)$")
+                    break
+                end
+            end
+            theme_file:close()
+        end
+        
+        local theme_dirs = {
+            "/usr/share/icons/" .. icon_theme .. "/scalable/apps/",
+            "/usr/share/icons/" .. icon_theme .. "/48x48/apps/",
+            "/usr/share/icons/" .. icon_theme .. "/32x32/apps/",
+            "/usr/share/icons/" .. icon_theme .. "/24x24/apps/",
+            "/usr/share/icons/" .. icon_theme .. "/16x16/apps/",
+        }
+        
+        for _, dir in ipairs(theme_dirs) do
+            local extensions = { "", ".png", ".svg", ".xpm" }
+            for _, ext in ipairs(extensions) do
+                local icon_path = dir .. name .. ext
+                if gears.filesystem.file_readable(icon_path) then
+                    return icon_path
+                end
+            end
+        end
+        
+        return nil
+    end
+    
+    -- Process desktop files
+    for _, dir in ipairs(desktop_dirs) do
+        local p = io.popen('find "' .. dir .. '" -name "*.desktop" 2>/dev/null')
+        if p then
+            for file in p:lines() do
+                local f = io.open(file, "r")
+                if f then
+                    local name, exec, icon_name = nil, nil, nil
+                    local hidden, no_display = false, false
+                    
+                    for line in f:lines() do
+                        if line:match("^Name=") then
+                            name = line:match("^Name=(.+)$")
+                        elseif line:match("^Exec=") then
+                            exec = line:match("^Exec=(.+)$"):gsub("%%[fFuUdDnNickvm]", ""):gsub("%s+$", "")
+                        elseif line:match("^Icon=") then
+                            icon_name = line:match("^Icon=(.+)$")
+                        elseif line:match("^Hidden=true") then
+                            hidden = true
+                        elseif line:match("^NoDisplay=true") then
+                            no_display = true
+                        end
+                    end
+                    
+                    f:close()
+                    
+                    if name and exec and not hidden and not no_display then
+                        local icon = find_icon(icon_name)
+                        table.insert(apps, { name, exec, icon })
+                    end
+                end
+            end
+            p:close()
+        end
+    end
+    
+    -- Sort applications alphabetically
+    table.sort(apps, function(a, b) return a[1] < b[1] end)
+    
+    -- Group applications by category
+    local categories = {
+        ["Internet"] = {},
+        ["Development"] = {},
+        ["Office"] = {},
+        ["Graphics"] = {},
+        ["Multimedia"] = {},
+        ["Games"] = {},
+        ["System"] = {},
+        ["Accessories"] = {},
+        ["Other"] = {}
+    }
+    
+    -- Categorize applications
+    for _, app in ipairs(apps) do
+        local name = app[1]:lower()
+        
+        if name:match("browser") or name:match("firefox") or name:match("chrome") or 
+           name:match("vivaldi") or name:match("opera") or name:match("thunderbird") or 
+           name:match("mail") or name:match("transmission") or name:match("torrent") then
+            table.insert(categories["Internet"], app)
+        elseif name:match("code") or name:match("editor") or name:match("ide") or 
+               name:match("vim") or name:match("emacs") or name:match("terminal") or 
+               name:match("git") or name:match("develop") then
+            table.insert(categories["Development"], app)
+        elseif name:match("office") or name:match("libre") or name:match("writer") or 
+               name:match("calc") or name:match("excel") or name:match("word") or 
+               name:match("powerpoint") or name:match("impress") or name:match("pdf") then
+            table.insert(categories["Office"], app)
+        elseif name:match("gimp") or name:match("inkscape") or name:match("photo") or 
+               name:match("draw") or name:match("paint") or name:match("image") then
+            table.insert(categories["Graphics"], app)
+        elseif name:match("media") or name:match("audio") or name:match("video") or 
+               name:match("music") or name:match("sound") or name:match("player") then
+            table.insert(categories["Multimedia"], app)
+        elseif name:match("game") or name:match("steam") then
+            table.insert(categories["Games"], app)
+        elseif name:match("system") or name:match("settings") or name:match("config") or 
+               name:match("control") or name:match("setup") then
+            table.insert(categories["System"], app)
+        elseif name:match("util") or name:match("tool") or name:match("calc") or 
+               name:match("archive") or name:match("compress") or name:match("zip") or 
+               name:match("text") then
+            table.insert(categories["Accessories"], app)
+        else
+            table.insert(categories["Other"], app)
+        end
+    end
+    
+    -- Build final menu structure
+    local menu_items = {}
+    for category, apps in pairs(categories) do
+        if #apps > 0 then
+            table.insert(menu_items, { category, apps })
+        end
+    end
+    
+    -- Sort categories
+    table.sort(menu_items, function(a, b) return a[1] < b[1] end)
+    
+    return menu_items
+end
+
+-- Create the main menu
+local mymainmenu = awful.menu({
+    items = {
+        { "awesome", myawesomemenu, beautiful.awesome_icon },
+        { "terminal", terminal },
+        { "applications", get_applications() }
+    }
+})
 
 local mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
                                      menu = mymainmenu })
