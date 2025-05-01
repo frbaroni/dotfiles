@@ -368,9 +368,9 @@ awful.widget.watch("upower -d", 30, function(widget, stdout)
   local current = ""
   local pct = ""
   local chrg = ""
-  local switchDevice = function(dlabel, dcolor)
+  local switchDevice = function(dlabel, dcolor, icon)
     if current ~= "" then
-      output = output .. markup.fontfg(theme_font, color, current .. ": " .. chrg .. pct .. "% ")
+      output = output .. markup.fontfg(theme_font, color, icon .. " " .. current .. ": " .. chrg .. pct .. "% ")
     end
     current = dlabel
     color = dcolor
@@ -379,18 +379,18 @@ awful.widget.watch("upower -d", 30, function(widget, stdout)
   end
   for line in stdout:gmatch("[^\r\n]+") do
     if line:match("model:") and line:match("SoundCore") then
-      switchDevice("SB", "#80D980")
+      switchDevice("SB", "#50FA7B", "󰋋")
     elseif line:match("model:") and line:match("Mouse") then
-      switchDevice("MS", "#D98080")
+      switchDevice("MS", "#FFB86C", "󰍽")
     elseif line:match("model:") or line:match("Device:") then
-      switchDevice("", "")
+      switchDevice("", "", "")
     elseif line:match("percentage:") then
       pct = line:match("(%d?%d?%d)%%")
     elseif line:match("state:") and line:match("charging") and not line:match("discharging") then
       chrg = "C"
     end
   end
-  switchDevice("", "")
+  switchDevice("", "", "")
   widget:set_markup(output)
 end, batbt)
 
