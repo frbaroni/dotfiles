@@ -842,7 +842,11 @@ local globalkeys = gears.table.join(
       awful.key({ }, "XF86AudioMute", function ()
             os.execute(string.format("amixer -q set %s toggle", volume.togglechannel or volume.channel))
             volume.update()
-      end)
+      end),
+      
+      awful.key({ modkey, "Shift" }, "b", function () 
+            awful.spawn.with_shell("export DEVICE='F4:2B:7D:49:A2:EC' && bluetoothctl disconnect $DEVICE && sleep 1 && bluetoothctl connect $DEVICE")
+      end, {description = "restart bluetooth device", group = "launcher"})
 )
 
 clientkeys = gears.table.join(
