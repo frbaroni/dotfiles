@@ -379,9 +379,9 @@ awful.widget.watch("upower -d", 30, function(widget, stdout)
   end
   for line in stdout:gmatch("[^\r\n]+") do
     if line:match("model:") and line:match("SoundCore") then
-      switchDevice("#50FA7B", "🎧")
+      switchDevice("#50FA7B", "󰋋")
     elseif line:match("model:") and line:match("Mouse") then
-      switchDevice("#FFB86C", "🖱️")
+      switchDevice("#FFB86C", "󰍽")
     elseif line:match("model:") or line:match("Device:") then
       switchDevice("", "")
     elseif line:match("percentage:") then
