@@ -2,6 +2,9 @@
 -- found (e.g. lgi). If LuaRocks is not installed, do nothing.
 pcall(require, "luarocks.loader")
 
+-- Define theme font
+local theme_font = beautiful.font
+
 -- Standard awesome library
 local gears = require("gears")
 local awful = require("awful")
@@ -325,7 +328,7 @@ local month_calendar = awful.widget.calendar_popup.month({
 })
 month_calendar:attach(mytextclock, "tr")
 
--- CPU all statsc below from copycats
+-- CPU all stats below from copycats
 local cpu = lain.widget.cpu({
     settings = function()
         widget:set_markup(markup.fontfg(theme_font, "#e33a6e", "\uf85a " .. cpu_now.usage .. "% "))
@@ -931,5 +934,5 @@ run_once({
    "picom",
    "lxpolkit",
    "~/activitywatch/aw-qt",
-   "xautolock -time 30 -locker ~/dotfiles/lock.sh",
+   "xautolock -time 30 -locker ~/dotfiles/lock.sh"
 })
