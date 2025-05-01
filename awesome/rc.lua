@@ -2,7 +2,9 @@
 -- found (e.g. lgi). If LuaRocks is not installed, do nothing.
 pcall(require, "luarocks.loader")
 
--- Define theme font
+-- Theme handling library
+local beautiful = require("beautiful")
+-- Define theme font after requiring beautiful
 local theme_font = beautiful.font
 
 -- Standard awesome library
@@ -414,7 +416,7 @@ local netupinfo = lain.widget.net({
 -- MEM
 local memory = lain.widget.mem({
     settings = function()
-        widget:set_markup(markup.fontfg(theme_font, "#e0da37", "\uf85a " .. mem_now.used .. " "))
+        widget:set_markup(markup.fontfg(theme_font, "#e0da37", "\uf2db " .. mem_now.used .. " "))
     end
 })
 
@@ -934,5 +936,5 @@ run_once({
    "picom",
    "lxpolkit",
    "~/activitywatch/aw-qt",
-   "xautolock -time 30 -locker ~/dotfiles/lock.sh"
+   "xautolock -time 30 -locker ~/dotfiles/lock.sh",
 })
