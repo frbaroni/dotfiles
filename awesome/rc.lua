@@ -362,6 +362,8 @@ local bat = lain.widget.bat({
 
 -- Bluetooth battery (Soundbar/Mouse)
 local batbt = wibox.widget.textbox()
+batbt.font = theme_font  -- Set the font directly on the widget
+
 awful.widget.watch("upower -d", 30, function(widget, stdout)
   local output = ""
   local color = "#ff00ff"
@@ -370,7 +372,8 @@ awful.widget.watch("upower -d", 30, function(widget, stdout)
   local chrg = ""
   local switchDevice = function(dcolor, icon)
     if current ~= "" then
-      output = output .. markup.fontfg(theme_font, color, icon .. " " .. chrg .. pct .. "% ")
+      -- Use simple text with the icon directly
+      output = output .. "<span foreground='" .. color .. "'>" .. icon .. " " .. chrg .. pct .. "% </span>"
     end
     current = icon
     color = dcolor
@@ -379,9 +382,11 @@ awful.widget.watch("upower -d", 30, function(widget, stdout)
   end
   for line in stdout:gmatch("[^\r\n]+") do
     if line:match("model:") and line:match("SoundCore") then
-      switchDevice("#50FA7B", "󰋋")
+      -- Use a simple headphones icon (Unicode)
+      switchDevice("#50FA7B", "🎧")
     elseif line:match("model:") and line:match("Mouse") then
-      switchDevice("#FFB86C", "󰍽")
+      -- Use a simple mouse icon (Unicode)
+      switchDevice("#FFB86C", "🖱️")
     elseif line:match("model:") or line:match("Device:") then
       switchDevice("", "")
     elseif line:match("percentage:") then
