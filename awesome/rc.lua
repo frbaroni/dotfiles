@@ -328,14 +328,14 @@ month_calendar:attach(mytextclock, "tr")
 -- CPU all statsc below from copycats
 local cpu = lain.widget.cpu({
     settings = function()
-        widget:set_markup(markup.fontfg(theme_font, "#e33a6e", "CPU " .. cpu_now.usage .. "% "))
+        widget:set_markup(markup.fontfg(theme_font, "#e33a6e", "\uf85a " .. cpu_now.usage .. "% "))
     end
 })
 
 -- Coretemp
 local temp = lain.widget.temp({
     settings = function()
-        widget:set_markup(markup.fontfg(theme_font, "#f1af5f", "Temp " .. coretemp_now .. "°C "))
+        widget:set_markup(markup.fontfg(theme_font, "#f1af5f", "\uf2c8 " .. coretemp_now .. "°C "))
     end
 })
 
@@ -345,9 +345,11 @@ local bat = lain.widget.bat({
         local perc = bat_now.perc ~= "N/A" and bat_now.perc .. "%" or bat_now.perc
 
         if bat_now.ac_status == 1 then
-            perc = "C" .. perc
+            perc = "\uf583 " .. perc
+        else
+            perc = "\uf578 " .. perc
         end
-        widget:set_markup(markup.fontfg(theme_font, "#8080D9", " Bat " .. perc .. " "))
+        widget:set_markup(markup.fontfg(theme_font, "#8080D9", perc .. " "))
     end
 })
 
@@ -390,8 +392,10 @@ local volume = lain.widget.alsa({
     settings = function()
         if volume_now.status == "off" then
             volume_now.level = volume_now.level .. "M"
+            widget:set_markup(markup.fontfg(theme_font, "#7493d2", "\uf466 " .. volume_now.level .. "% "))
+        else
+            widget:set_markup(markup.fontfg(theme_font, "#7493d2", "\uf028 " .. volume_now.level .. "% "))
         end
-        widget:set_markup(markup.fontfg(theme_font, "#7493d2", "Vol " .. volume_now.level .. "% "))
     end
 })
 
@@ -399,15 +403,15 @@ local volume = lain.widget.alsa({
 local netdowninfo = wibox.widget.textbox()
 local netupinfo = lain.widget.net({
     settings = function()
-        netdowninfo:set_markup(markup.fontfg(theme_font, "#87af5f", "DW " .. net_now.received .. " "))
-        widget:set_markup(markup.fontfg(theme_font, "#e54c62", "UP " .. net_now.sent .. " "))
+        netdowninfo:set_markup(markup.fontfg(theme_font, "#87af5f", "\uf547 " .. net_now.received .. " "))
+        widget:set_markup(markup.fontfg(theme_font, "#e54c62", "\uf55c " .. net_now.sent .. " "))
     end
 })
 
 -- MEM
 local memory = lain.widget.mem({
     settings = function()
-        widget:set_markup(markup.fontfg(theme_font, "#e0da37", "Mem " .. mem_now.used .. " "))
+        widget:set_markup(markup.fontfg(theme_font, "#e0da37", "\uf85a " .. mem_now.used .. " "))
     end
 })
 
