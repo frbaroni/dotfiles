@@ -364,7 +364,7 @@ local bat = lain.widget.bat({
 local batbt = wibox.widget.textbox()
 batbt.font = theme_font  -- Set the font directly on the widget
 
-awful.widget.watch("upower -d", 30, function(widget, stdout)
+awful.widget.watch("upower -d", 2, function(widget, stdout)
   local output = ""
   local color = "#ff00ff"
   local current = ""
@@ -382,11 +382,11 @@ awful.widget.watch("upower -d", 30, function(widget, stdout)
   end
   for line in stdout:gmatch("[^\r\n]+") do
     if line:match("model:") and line:match("SoundCore") then
-      -- Use a simple headphones icon (Unicode)
-      switchDevice("#50FA7B", "🎧")
+      -- Use Nerd Font headphones icon instead of emoji
+      switchDevice("#50FA7B", "󰋋")
     elseif line:match("model:") and line:match("Mouse") then
-      -- Use a simple mouse icon (Unicode)
-      switchDevice("#FFB86C", "🖱️")
+      -- Use Nerd Font mouse icon instead of emoji
+      switchDevice("#FFB86C", "󰍽")
     elseif line:match("model:") or line:match("Device:") then
       switchDevice("", "")
     elseif line:match("percentage:") then
