@@ -343,10 +343,12 @@ local cpu_tooltip = awful.tooltip({
     objects = { cpu.widget },
     timer_function = function()
         local result = "CPU Usage: " .. cpu_now.usage .. "%\n"
-        -- Add per-core information if available
-        for i, core in pairs(cpu_now.core) do
-            result = result .. "Core " .. i .. ": " .. core .. "%\n"
+        for i in pairs(cpu_now) do
+            if i ~= 'usage' and i ~= 0 then
+              result = result .. "Core " .. i .. ": " .. cpu_now[i].usage .. "%\n"
+            end
         end
+
         return result
     end,
     delay_show = 0.5
@@ -553,49 +555,11 @@ local net = lain.widget.net({
     end
 })
 
--- Create tooltip for download
-local netdown_tooltip = awful.tooltip({
-    objects = { netdowninfo },
+local netupdown_tooltip = awful.tooltip({
+    objects = { netdowninfo, netupinfo },
     timer_function = function()
-        local text = "Download:\n" ..
-                     "Current: " .. net_now.received .. "\n"
-        
-        -- Add device information if available
-        if net_now.devices then
-            text = text .. "\nDevices:\n"
-            for _, dev in ipairs(net_now.devices) do
-                text = text .. "• " .. dev .. "\n"
-            end
-        end
-        
-        -- Add more detailed network info
-        local f = io.popen("ifconfig")
-        if f then
-            local ifconfig = f:read("*all")
-            f:close()
-            text = text .. "\nNetwork Interfaces:\n" .. ifconfig
-        end
-        
-        return text
-    end,
-    delay_show = 0.5
-})
-
--- Create tooltip for upload
-local netup_tooltip = awful.tooltip({
-    objects = { netupinfo },
-    timer_function = function()
-        local text = "Upload:\n" ..
-                     "Current: " .. net_now.sent .. "\n"
-        
-        -- Add device information if available
-        if net_now.devices then
-            text = text .. "\nDevices:\n"
-            for _, dev in ipairs(net_now.devices) do
-                text = text .. "• " .. dev .. "\n"
-            end
-        end
-        
+        local text =   "Download: " .. net_now.received .. "\n"
+        text = text .. "Upload: " .. net_now.sent .. "\n"
         return text
     end,
     delay_show = 0.5
