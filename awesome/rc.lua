@@ -384,7 +384,7 @@ awful.widget.watch("upower -d", 2, function(widget, stdout)
   btmouse:set_markup("")
   for line in stdout:gmatch("[^\r\n]+") do
     if line:match("model:") and line:match("SoundCore") then
-      switchDevice(btsoundbar, "#50FA7B", "󰋋 ")
+      switchDevice(btsoundbar, "#50FA7B", "󱟛 ")
     elseif line:match("model:") and line:match("Mouse") then
       switchDevice(btmouse, "#FFB86C", "󰍽 ")
     elseif line:match("model:") or line:match("Device:") then
