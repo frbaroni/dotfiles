@@ -334,14 +334,14 @@ month_calendar:attach(mytextclock, "tr")
 -- CPU all stats below from copycats
 local cpu = lain.widget.cpu({
     settings = function()
-        widget:set_markup(markup.fontfg(theme_font, "#FF6E67", "󰻠 " .. cpu_now.usage .. "% "))
+        widget:set_markup(markup.fontfg(theme_font, "#FF6E67", "󰻠 " .. cpu_now.usage .. "%  "))
     end
 })
 
 -- Coretemp
 local temp = lain.widget.temp({
     settings = function()
-        widget:set_markup(markup.fontfg(theme_font, "#FFB86C", "󰔏 " .. coretemp_now .. "°C "))
+        widget:set_markup(markup.fontfg(theme_font, "#FFB86C", "󰔏 " .. coretemp_now .. "°C  "))
     end
 })
 
@@ -356,75 +356,77 @@ local bat = lain.widget.bat({
         else
             perc = "󰁹 " .. perc
         end
-        widget:set_markup(markup.fontfg(theme_font, color, perc .. " "))
+        widget:set_markup(markup.fontfg(theme_font, color, perc .. "  "))
     end
 })
 
 -- Bluetooth battery (Soundbar/Mouse)
-local batbt = wibox.widget.textbox()
-batbt.font = theme_font  -- Set the font directly on the widget
+local btsoundbar = wibox.widget.textbox()
+local btmouse = wibox.widget.textbox()
 
 awful.widget.watch("upower -d", 2, function(widget, stdout)
-  local output = ""
-  local color = "#ff00ff"
-  local current = ""
+  local box = nil
+  local color = ""
+  local icon = ""
   local pct = ""
   local chrg = ""
-  local switchDevice = function(dcolor, icon)
-    if current ~= "" then
-      -- Use simple text with the icon directly
-      output = output .. "<span foreground='" .. color .. "'>" .. icon .. " " .. chrg .. pct .. "% </span>"
+  local switchDevice = function(dwidget, dcolor, dicon)
+    if box ~= nil then
+      box:set_markup(markup.fontfg(theme_font, color, icon .. chrg .. pct .. "%  "))
     end
-    current = icon
+    box = dwidget
+    icon = dicon
     color = dcolor
     pct = ""
     chrg = ""
   end
+  btsoundbar:set_markup("")
+  btmouse:set_markup("")
   for line in stdout:gmatch("[^\r\n]+") do
     if line:match("model:") and line:match("SoundCore") then
-      -- Use Nerd Font headphones icon instead of emoji
-      switchDevice("#50FA7B", "󰋋")
+      switchDevice(btsoundbar, "#50FA7B", "󰋋 ")
     elseif line:match("model:") and line:match("Mouse") then
-      -- Use Nerd Font mouse icon instead of emoji
-      switchDevice("#FFB86C", "󰍽")
+      switchDevice(btmouse, "#FFB86C", "󰍽 ")
     elseif line:match("model:") or line:match("Device:") then
-      switchDevice("", "")
+      switchDevice(nil, "", "")
     elseif line:match("percentage:") then
       pct = line:match("(%d?%d?%d)%%")
     elseif line:match("state:") and line:match("charging") and not line:match("discharging") then
       chrg = "C"
     end
   end
-  switchDevice("", "")
-  widget:set_markup(output)
-end, batbt)
+  switchDevice(nil, "", "")
+end, nil)
 
 -- ALSA volume
 local volume = lain.widget.alsa({
     settings = function()
         local color = "#BD93F9"
+        local icon
         if volume_now.status == "off" then
-            volume_now.level = volume_now.level .. "M"
-            widget:set_markup(markup.fontfg(theme_font, color, "󰝟 " .. volume_now.level .. "% "))
+          icon = "󰝟 "
         else
-            widget:set_markup(markup.fontfg(theme_font, color, "󰕾 " .. volume_now.level .. "% "))
+          icon = "󰕾 "
         end
+    widget:set_markup(markup.fontfg(theme_font, color, icon .. volume_now.level .. "%  "))
     end
 })
 
 -- Net
 local netdowninfo = wibox.widget.textbox()
-local netupinfo = lain.widget.net({
+local netupinfo = wibox.widget.textbox()
+
+lain.widget.net({
     settings = function()
         netdowninfo:set_markup(markup.fontfg(theme_font, "#50FA7B", "󰇚 " .. net_now.received .. " "))
-        widget:set_markup(markup.fontfg(theme_font, "#FF79C6", "󰕒 " .. net_now.sent .. " "))
+        netupinfo:set_markup(markup.fontfg(theme_font, "#FF79C6", "󰕒 " .. net_now.sent .. "  "))
     end
 })
 
 -- MEM
 local memory = lain.widget.mem({
     settings = function()
-        widget:set_markup(markup.fontfg(theme_font, "#F1FA8C", "󰍛 " .. mem_now.used .. " "))
+        widget:set_markup(markup.fontfg(theme_font, "#F1FA8C", "󰍛 " .. mem_now.used .. "  "))
     end
 })
 
@@ -531,12 +533,13 @@ awful.screen.connect_for_each_screen(function(s)
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
             bat.widget,
-            batbt,
+            btmouse,
+            btsoundbar,
             cpu.widget,
             temp.widget,
             memory.widget,
             netdowninfo,
-            netupinfo.widget,
+            netupinfo,
             volume.widget,
             mykeyboardlayout,
             wibox.widget.systray(),
