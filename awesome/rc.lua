@@ -4,7 +4,9 @@ pcall(require, "luarocks.loader")
 
 -- Theme handling library
 local beautiful = require("beautiful")
--- Define theme font after requiring beautiful
+-- Initialize beautiful before using it
+beautiful.init(gears.filesystem.get_themes_dir() .. "zenburn/theme.lua")
+-- Define theme font after beautiful is initialized
 local theme_font = beautiful.font
 
 -- Standard awesome library
@@ -333,7 +335,7 @@ month_calendar:attach(mytextclock, "tr")
 -- CPU all stats below from copycats
 local cpu = lain.widget.cpu({
     settings = function()
-        widget:set_markup(markup.fontfg(theme_font, "#e33a6e", "\uf85a " .. cpu_now.usage .. "% "))
+        widget:set_markup(markup.fontfg(theme_font, "#e33a6e", "\\uf85a " .. cpu_now.usage .. "% "))
     end
 })
 
@@ -936,5 +938,5 @@ run_once({
    "picom",
    "lxpolkit",
    "~/activitywatch/aw-qt",
-   "xautolock -time 30 -locker ~/dotfiles/lock.sh",
+   "xautolock -time 30 -locker ~/dotfiles/lock.sh"
 })
