@@ -338,11 +338,46 @@ local cpu = lain.widget.cpu({
     end
 })
 
+-- Create tooltip for CPU
+local cpu_tooltip = awful.tooltip({
+    objects = { cpu.widget },
+    timer_function = function()
+        local result = "CPU Usage: " .. cpu_now.usage .. "%\n"
+        -- Add per-core information if available
+        for i, core in pairs(cpu_now.core) do
+            result = result .. "Core " .. i .. ": " .. core .. "%\n"
+        end
+        return result
+    end,
+    delay_show = 0.5
+})
+
 -- Coretemp
 local temp = lain.widget.temp({
     settings = function()
         widget:set_markup(markup.fontfg(theme_font, "#FFB86C", "󰔏 " .. coretemp_now .. "°C  "))
     end
+})
+
+-- Create tooltip for temperature
+local temp_tooltip = awful.tooltip({
+    objects = { temp.widget },
+    timer_function = function()
+        -- Try to get more detailed temperature info
+        local temps = ""
+        local f = io.popen("sensors")
+        if f then
+            temps = f:read("*all")
+            f:close()
+        end
+        
+        if temps == "" then
+            return "CPU Temperature: " .. coretemp_now .. "°C"
+        else
+            return temps
+        end
+    end,
+    delay_show = 0.5
 })
 
 -- Battery laptop
@@ -360,9 +395,83 @@ local bat = lain.widget.bat({
     end
 })
 
+-- Create tooltip for battery
+local bat_tooltip = awful.tooltip({
+    objects = { bat.widget },
+    timer_function = function()
+        local text = "Battery Status:\n" ..
+                     "Charge: " .. bat_now.perc .. "%\n" ..
+                     "Status: " .. (bat_now.ac_status == 1 and "Charging" or "Discharging") .. "\n"
+        
+        if bat_now.time then
+            text = text .. "Time remaining: " .. bat_now.time .. "\n"
+        end
+        
+        if bat_now.watt then
+            text = text .. "Power: " .. bat_now.watt .. "W\n"
+        end
+        
+        -- Add more detailed battery info
+        local f = io.popen("acpi -i")
+        if f then
+            local acpi = f:read("*all")
+            f:close()
+            text = text .. "\nDetailed Info:\n" .. acpi
+        end
+        
+        return text
+    end,
+    delay_show = 0.5
+})
+
 -- Bluetooth battery (Soundbar/Mouse)
 local btsoundbar = wibox.widget.textbox()
 local btmouse = wibox.widget.textbox()
+
+-- Create tooltips for bluetooth devices
+local btsoundbar_tooltip = awful.tooltip({
+    objects = { btsoundbar },
+    timer_function = function()
+        local text = "Bluetooth Soundbar:\n"
+        
+        -- Get detailed bluetooth info
+        local f = io.popen("bluetoothctl info | grep -E 'Name|Connected|Paired|Battery'")
+        if f then
+            local btinfo = f:read("*all")
+            f:close()
+            if btinfo and btinfo ~= "" then
+                text = text .. btinfo
+            else
+                text = text .. "No detailed information available"
+            end
+        end
+        
+        return text
+    end,
+    delay_show = 0.5
+})
+
+local btmouse_tooltip = awful.tooltip({
+    objects = { btmouse },
+    timer_function = function()
+        local text = "Bluetooth Mouse:\n"
+        
+        -- Get detailed bluetooth info
+        local f = io.popen("bluetoothctl info | grep -E 'Name|Connected|Paired|Battery'")
+        if f then
+            local btinfo = f:read("*all")
+            f:close()
+            if btinfo and btinfo ~= "" then
+                text = text .. btinfo
+            else
+                text = text .. "No detailed information available"
+            end
+        end
+        
+        return text
+    end,
+    delay_show = 0.5
+})
 
 awful.widget.watch("upower -d", 2, function(widget, stdout)
   local box = nil
@@ -412,15 +521,84 @@ local volume = lain.widget.alsa({
     end
 })
 
+-- Create tooltip for volume
+local volume_tooltip = awful.tooltip({
+    objects = { volume.widget },
+    timer_function = function()
+        local text = "Volume:\n" ..
+                     "Level: " .. volume_now.level .. "%\n" ..
+                     "Status: " .. (volume_now.status == "off" and "Muted" or "Unmuted") .. "\n"
+        
+        -- Add more detailed volume info
+        local f = io.popen("amixer get " .. volume.channel)
+        if f then
+            local amixer = f:read("*all")
+            f:close()
+            text = text .. "\nDetailed Info:\n" .. amixer
+        end
+        
+        return text
+    end,
+    delay_show = 0.5
+})
+
 -- Net
 local netdowninfo = wibox.widget.textbox()
 local netupinfo = wibox.widget.textbox()
 
-lain.widget.net({
+local net = lain.widget.net({
     settings = function()
         netdowninfo:set_markup(markup.fontfg(theme_font, "#50FA7B", "󰇚 " .. net_now.received .. " "))
         netupinfo:set_markup(markup.fontfg(theme_font, "#FF79C6", "󰕒 " .. net_now.sent .. "  "))
     end
+})
+
+-- Create tooltip for download
+local netdown_tooltip = awful.tooltip({
+    objects = { netdowninfo },
+    timer_function = function()
+        local text = "Download:\n" ..
+                     "Current: " .. net_now.received .. "\n"
+        
+        -- Add device information if available
+        if net_now.devices then
+            text = text .. "\nDevices:\n"
+            for _, dev in ipairs(net_now.devices) do
+                text = text .. "• " .. dev .. "\n"
+            end
+        end
+        
+        -- Add more detailed network info
+        local f = io.popen("ifconfig")
+        if f then
+            local ifconfig = f:read("*all")
+            f:close()
+            text = text .. "\nNetwork Interfaces:\n" .. ifconfig
+        end
+        
+        return text
+    end,
+    delay_show = 0.5
+})
+
+-- Create tooltip for upload
+local netup_tooltip = awful.tooltip({
+    objects = { netupinfo },
+    timer_function = function()
+        local text = "Upload:\n" ..
+                     "Current: " .. net_now.sent .. "\n"
+        
+        -- Add device information if available
+        if net_now.devices then
+            text = text .. "\nDevices:\n"
+            for _, dev in ipairs(net_now.devices) do
+                text = text .. "• " .. dev .. "\n"
+            end
+        end
+        
+        return text
+    end,
+    delay_show = 0.5
 })
 
 -- MEM
@@ -428,6 +606,19 @@ local memory = lain.widget.mem({
     settings = function()
         widget:set_markup(markup.fontfg(theme_font, "#F1FA8C", "󰍛 " .. mem_now.used .. "  "))
     end
+})
+
+-- Create tooltip for memory
+local mem_tooltip = awful.tooltip({
+    objects = { memory.widget },
+    timer_function = function()
+        return "Memory Usage:\n" ..
+               "Used: " .. mem_now.used .. " (" .. mem_now.perc .. "%)\n" ..
+               "Free: " .. mem_now.free .. "\n" ..
+               "Total: " .. mem_now.total .. "\n" ..
+               "Swap: " .. (mem_now.swapused or "N/A")
+    end,
+    delay_show = 0.5
 })
 
 
