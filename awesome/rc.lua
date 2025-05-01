@@ -604,7 +604,7 @@ local netup_tooltip = awful.tooltip({
 -- MEM
 local memory = lain.widget.mem({
     settings = function()
-        widget:set_markup(markup.fontfg(theme_font, "#F1FA8C", "󰍛 " .. mem_now.used .. "  "))
+        widget:set_markup(markup.fontfg(theme_font, "#F1FA8C", "󰍛 " .. mem_now.perc .. "%  "))
     end
 })
 
