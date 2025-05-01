@@ -54,7 +54,7 @@ end
 -- Themes define colours, icons, font and wallpapers.
 beautiful.init(gears.filesystem.get_themes_dir() .. "zenburn/theme.lua")
 -- Set up font with icons
-beautiful.font = "CaskaydiaCove Nerd Font Mono 9"
+beautiful.font = theme_font
 
 -- This is used later as the default terminal and editor to run.
 local terminal = "kitty"
