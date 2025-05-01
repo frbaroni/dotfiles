@@ -4,10 +4,9 @@ pcall(require, "luarocks.loader")
 
 -- Theme handling library
 local beautiful = require("beautiful")
--- Define theme font after beautiful is initialized
-local theme_font = beautiful.font
-
 -- Standard awesome library
+-- Define theme font
+local theme_font = "CaskaydiaCove Nerd Font Mono 9"
 local gears = require("gears")
 local awful = require("awful")
 require("awful.autofocus")
@@ -55,7 +54,7 @@ end
 -- Themes define colours, icons, font and wallpapers.
 beautiful.init(gears.filesystem.get_themes_dir() .. "zenburn/theme.lua")
 -- Set up font with icons
-beautiful.font = "sans 8, Font Awesome 6 Free Regular 8"
+beautiful.font = "CaskaydiaCove Nerd Font Mono 9"
 
 -- This is used later as the default terminal and editor to run.
 local terminal = "kitty"
@@ -335,14 +334,14 @@ month_calendar:attach(mytextclock, "tr")
 -- CPU all stats below from copycats
 local cpu = lain.widget.cpu({
     settings = function()
-        widget:set_markup(markup.fontfg(theme_font, "#e33a6e", "" .. cpu_now.usage .. "% "))
+        widget:set_markup(markup.fontfg(theme_font, "#FF6E67", "󰻠 " .. cpu_now.usage .. "% "))
     end
 })
 
 -- Coretemp
 local temp = lain.widget.temp({
     settings = function()
-        widget:set_markup(markup.fontfg(theme_font, "#f1af5f", "" .. coretemp_now .. "°C "))
+        widget:set_markup(markup.fontfg(theme_font, "#FFB86C", "󰔏 " .. coretemp_now .. "°C "))
     end
 })
 
@@ -350,13 +349,14 @@ local temp = lain.widget.temp({
 local bat = lain.widget.bat({
     settings = function()
         local perc = bat_now.perc ~= "N/A" and bat_now.perc .. "%" or bat_now.perc
+        local color = "#8BE9FD"
 
         if bat_now.ac_status == 1 then
-            perc = "" .. perc
+            perc = "󰂄 " .. perc
         else
-            perc = "" .. perc
+            perc = "󰁹 " .. perc
         end
-        widget:set_markup(markup.fontfg(theme_font, "#8080D9", perc .. " "))
+        widget:set_markup(markup.fontfg(theme_font, color, perc .. " "))
     end
 })
 
@@ -397,11 +397,12 @@ end, batbt)
 -- ALSA volume
 local volume = lain.widget.alsa({
     settings = function()
+        local color = "#BD93F9"
         if volume_now.status == "off" then
             volume_now.level = volume_now.level .. "M"
-            widget:set_markup(markup.fontfg(theme_font, "#7493d2", "" .. volume_now.level .. "% "))
+            widget:set_markup(markup.fontfg(theme_font, color, "󰝟 " .. volume_now.level .. "% "))
         else
-            widget:set_markup(markup.fontfg(theme_font, "#7493d2", "" .. volume_now.level .. "% "))
+            widget:set_markup(markup.fontfg(theme_font, color, "󰕾 " .. volume_now.level .. "% "))
         end
     end
 })
@@ -410,15 +411,15 @@ local volume = lain.widget.alsa({
 local netdowninfo = wibox.widget.textbox()
 local netupinfo = lain.widget.net({
     settings = function()
-        netdowninfo:set_markup(markup.fontfg(theme_font, "#87af5f", "" .. net_now.received .. " "))
-        widget:set_markup(markup.fontfg(theme_font, "#e54c62", "" .. net_now.sent .. " "))
+        netdowninfo:set_markup(markup.fontfg(theme_font, "#50FA7B", "󰇚 " .. net_now.received .. " "))
+        widget:set_markup(markup.fontfg(theme_font, "#FF79C6", "󰕒 " .. net_now.sent .. " "))
     end
 })
 
 -- MEM
 local memory = lain.widget.mem({
     settings = function()
-        widget:set_markup(markup.fontfg(theme_font, "#e0da37", "" .. mem_now.used .. " "))
+        widget:set_markup(markup.fontfg(theme_font, "#F1FA8C", "󰍛 " .. mem_now.used .. " "))
     end
 })
 
