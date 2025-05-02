@@ -8,7 +8,7 @@ local beautiful = require("beautiful")
 -- Define theme font
 local font_family = "CaskaydiaCove Nerd Font Mono"
 local theme_font = font_family .. " 12"
-local icon_font = font_family .. " 16"
+local icon_font = font_family .. " 14"
 local gears = require("gears")
 local awful = require("awful")
 require("awful.autofocus")
@@ -306,7 +306,7 @@ kbdcfg.widget:set_markup("KB")
 kbdcfg.switch = function ()
   kbdcfg.current = kbdcfg.current % #(kbdcfg.layout) + 1
   local t = kbdcfg.layout[kbdcfg.current]
-  kbdcfg.widget:set_markup(themed_icon("#FF6E67", "󰌌", t[1]))
+  kbdcfg.widget:set_markup(themed_icon("#896E89", "󰌌", t[1]))
   os.execute( kbdcfg.cmd .. " " .. t[1] .. " " .. t[2] )
 end
 kbdcfg.current = kbdcfg.current - 1
