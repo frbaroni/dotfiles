@@ -6,7 +6,9 @@ pcall(require, "luarocks.loader")
 local beautiful = require("beautiful")
 -- Standard awesome library
 -- Define theme font
-local theme_font = "CaskaydiaCove Nerd Font Mono 9"
+local font_family = "CaskaydiaCove Nerd Font Mono"
+local theme_font = font_family .. " 12"
+local icon_font = font_family .. " 16"
 local gears = require("gears")
 local awful = require("awful")
 require("awful.autofocus")
@@ -278,8 +280,17 @@ local mymainmenu = awful.menu({
     }
 })
 
-local mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
-                                     menu = mymainmenu })
+local function themed_icon(color, icon, label)
+  return markup.fontfg(icon_font, color, icon) .. markup.fontfg(theme_font, color, " " .. label .. " ")
+end
+
+local mylauncher = wibox.widget {
+    markup = themed_icon("#50fa7b", "", ""),
+    widget = wibox.widget.textbox,
+}
+mylauncher:buttons(gears.table.join(
+    awful.button({}, 1, function() mymainmenu:toggle() end)
+))
 
 -- Menubar configuration
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
@@ -291,11 +302,11 @@ kbdcfg.cmd = "setxkbmap"
 kbdcfg.layout = { { "us", "" }, { "br", "" } }
 kbdcfg.current = 2  -- default layout
 kbdcfg.widget = wibox.widget.textbox()
-kbdcfg.widget:set_text(" " .. kbdcfg.layout[kbdcfg.current][1] .. " ")
+kbdcfg.widget:set_markup("KB")
 kbdcfg.switch = function ()
   kbdcfg.current = kbdcfg.current % #(kbdcfg.layout) + 1
   local t = kbdcfg.layout[kbdcfg.current]
-  kbdcfg.widget:set_text(" " .. t[1] .. " ")
+  kbdcfg.widget:set_markup(themed_icon("#FF6E67", "󰌌", t[1]))
   os.execute( kbdcfg.cmd .. " " .. t[1] .. " " .. t[2] )
 end
 kbdcfg.current = kbdcfg.current - 1
@@ -307,6 +318,17 @@ kbdcfg.widget:buttons(
 local mykeyboardlayout = kbdcfg.widget
 
 -- {{{ Wibar
+-- Define colors for our beautiful taskbar
+local colors = {
+    bg_gradient_transparency = "#00000000", -- Fully transparent
+    bg_gradient_from = "#28282866",         -- Dark gray with 40% opacity
+    bg_gradient_mid = "#00000033",          -- Black with 20% opacity
+    bg_gradient_to = "#28282866",           -- Dark gray with 40% opacity
+    task_border = "#6272A433",              -- Soft blue with 20% opacity
+    task_bg_normal = "#00000022",           -- Very subtle black with 13% opacity
+    task_bg_focus = "#6272A480",            -- Soft blue with 50% opacity
+}
+
 -- Create a textclock widget
 local mytextclock = wibox.widget.textclock()
 local month_calendar = awful.widget.calendar_popup.month({
@@ -320,7 +342,7 @@ month_calendar:attach(mytextclock, "tr")
 -- CPU all stats below from copycats
 local cpu = lain.widget.cpu({
     settings = function()
-        widget:set_markup(markup.fontfg(theme_font, "#FF6E67", "󰻠 " .. cpu_now.usage .. "%  "))
+        widget:set_markup(themed_icon("#FF6E67", "󰻠", cpu_now.usage .. "%"))
     end
 })
 
@@ -343,7 +365,7 @@ local cpu_tooltip = awful.tooltip({
 -- Coretemp
 local temp = lain.widget.temp({
     settings = function()
-        widget:set_markup(markup.fontfg(theme_font, "#FFB86C", "󰔏 " .. coretemp_now .. "°C  "))
+        widget:set_markup(themed_icon("#FFB86C", "󰔏", coretemp_now .. "°C"))
     end
 })
 
@@ -373,13 +395,13 @@ local bat = lain.widget.bat({
     settings = function()
         local perc = bat_now.perc ~= "N/A" and bat_now.perc .. "%" or bat_now.perc
         local color = "#8BE9FD"
-
+        local icon
         if bat_now.ac_status == 1 then
-            perc = "󰂄 " .. perc
+            icon = "󰂄"
         else
-            perc = "󰁹 " .. perc
+            icon = "󰁹"
         end
-        widget:set_markup(markup.fontfg(theme_font, color, " " .. perc .. "  "))
+        widget:set_markup(themed_icon(color, icon, perc))
     end
 })
 
@@ -469,7 +491,7 @@ awful.widget.watch("upower -d", 2, function(widget, stdout)
   local chrg = ""
   local switchDevice = function(dwidget, dcolor, dicon)
     if box ~= nil then
-      box:set_markup(markup.fontfg(theme_font, color, icon .. chrg .. pct .. "%  "))
+      box:set_markup(themed_icon(color, icon, chrg .. pct .. "%"))
     end
     box = dwidget
     icon = dicon
@@ -481,15 +503,15 @@ awful.widget.watch("upower -d", 2, function(widget, stdout)
   btmouse:set_markup("")
   for line in stdout:gmatch("[^\r\n]+") do
     if line:match("model:") and line:match("SoundCore") then
-      switchDevice(btsoundbar, "#50FA7B", "󱟛 ")
+      switchDevice(btsoundbar, "#50FA7B", "󰗾")
     elseif line:match("model:") and line:match("Mouse") then
-      switchDevice(btmouse, "#FFB86C", "󰍽 ")
+      switchDevice(btmouse, "#FFB86C", "󰍽")
     elseif line:match("model:") or line:match("Device:") then
       switchDevice(nil, "", "")
     elseif line:match("percentage:") then
       pct = line:match("(%d?%d?%d)%%")
     elseif line:match("state:") and line:match("charging") and not line:match("discharging") then
-      chrg = "C"
+      chrg = "󰚥"
     end
   end
   switchDevice(nil, "", "")
@@ -501,11 +523,11 @@ local volume = lain.widget.alsa({
         local color = "#BD93F9"
         local icon
         if volume_now.status == "off" then
-          icon = "󰝟 "
+          icon = "󰝟"
         else
-          icon = "󰕾 "
+          icon = "󰕾"
         end
-    widget:set_markup(markup.fontfg(theme_font, color, icon .. volume_now.level .. "%  "))
+    widget:set_markup(themed_icon(color, icon, volume_now.level .. "%"))
     end
 })
 
@@ -536,8 +558,8 @@ local netupinfo = wibox.widget.textbox()
 
 local net = lain.widget.net({
     settings = function()
-        netdowninfo:set_markup(markup.fontfg(theme_font, "#50FA7B", "󰇚 " .. net_now.received .. " "))
-        netupinfo:set_markup(markup.fontfg(theme_font, "#FF79C6", "󰕒 " .. net_now.sent .. "  "))
+        netdowninfo:set_markup(themed_icon("#50FA7B", "󰇚", net_now.received))
+        netupinfo:set_markup(themed_icon("#FF79C6", "󰕒", net_now.sent .. " "))
     end
 })
 
@@ -554,7 +576,7 @@ local netupdown_tooltip = awful.tooltip({
 -- MEM
 local memory = lain.widget.mem({
     settings = function()
-        widget:set_markup(markup.fontfg(theme_font, "#F1FA8C", "󰍛 " .. mem_now.perc .. "%  "))
+        widget:set_markup(themed_icon("#F1FA8C", "󰍛", mem_now.perc .. "%"))
     end
 })
 
@@ -651,43 +673,117 @@ awful.screen.connect_for_each_screen(function(s)
         buttons = taglist_buttons
     }
 
-    -- Create a tasklist widget
+    -- Create the wibox with our beautiful styling
+    s.mywibox = awful.wibar({
+        position = "top",
+        screen   = s,
+        bg       = colors.bg_gradient_transparency,
+        fg       = beautiful.fg_normal,
+    })
+
+    -- Create a gradient background for the wibar
+    s.mywibox.bgimage = function(context, cr, width, height)
+        local grad = gears.color.create_linear_pattern({
+            type = "linear",
+            from = { 0, 0, 0 },
+            to = { 0, height / 2, height },
+            stops = {
+                { 0, colors.bg_gradient_from },
+                { 1, colors.bg_gradient_mid },
+                { 2, colors.bg_gradient_to }
+            }
+        })
+        cr:set_source(grad)
+        cr:paint()
+    end
+
+    -- Custom tasklist with beautiful styling
     s.mytasklist = awful.widget.tasklist {
         screen  = s,
         filter  = awful.widget.tasklist.filter.currenttags,
-        buttons = tasklist_buttons
+        buttons = tasklist_buttons,
+        style   = {
+            shape = function(cr, width, height)
+                gears.shape.rounded_rect(cr, width, height, 3) -- Slight rounding
+            end,
+            shape_border_width = 1,
+            shape_border_color = colors.task_border,
+            bg_normal = colors.task_bg_normal,
+            bg_focus = colors.task_bg_focus,
+            font = theme_font,
+            spacing = 2, -- 2px gap between tasks
+        },
+        layout = {
+            spacing = 2,
+            layout = wibox.layout.flex.horizontal
+        },
+        widget_template = {
+            {
+                {
+                    {
+                        {
+                            id     = 'icon_role',
+                            widget = wibox.widget.imagebox,
+                        },
+                        margins = 2,
+                        widget  = wibox.container.margin,
+                    },
+                    {
+                        id     = 'text_role',
+                        widget = wibox.widget.textbox,
+                        ellipsize = "end",
+                        max_width_chars = 20, -- Limit width of task names
+                    },
+                    layout = wibox.layout.fixed.horizontal,
+                },
+                margins = 2, -- Inner padding
+                widget  = wibox.container.margin
+            },
+            id     = 'background_role',
+            widget = wibox.container.background,
+        },
     }
 
-    -- Create the wibox
-    s.mywibox = awful.wibar({ position = "top", screen = s })
+    beautiful.bg_systray = colors.bg_gradient_mid
+    beautiful.systray_icon_spacing = 4
+    local mysystray = wibox.widget.systray()
+    mysystray.opacity = 0
 
-    -- Add widgets to the wibox
-    s.mywibox:setup {
-        layout = wibox.layout.align.horizontal,
-        { -- Left widgets
-            layout = wibox.layout.fixed.horizontal,
-            mylauncher,
-            s.mytaglist,
-            s.mypromptbox,
+    -- Add widgets to the wibox with padding
+    -- Create a padded container for all widgets
+    local padded_wibar = wibox.container.margin(
+        wibox.widget{
         },
-        s.mytasklist, -- Middle widget
-        { -- Right widgets
-            layout = wibox.layout.fixed.horizontal,
-            bat.widget,
-            btmouse,
-            btsoundbar,
-            cpu.widget,
-            temp.widget,
-            memory.widget,
-            netdowninfo,
-            netupinfo,
-            volume.widget,
-            mykeyboardlayout,
-            wibox.widget.systray(),
-            mytextclock,
-            s.mylayoutbox,
-        },
-    }
+        2, 2, 1, 1  -- left, right, top, bottom padding
+    )
+    
+    -- Apply the gradient background to the wibar
+  s.mywibox:setup {
+    layout = wibox.layout.align.horizontal,
+    { -- Left widgets
+      layout = wibox.layout.fixed.horizontal,
+      mylauncher,
+      s.mytaglist,
+      s.mypromptbox,
+    },
+    s.mytasklist, -- Middle widget (expands to fill space)
+    { -- Right widgets
+      layout = wibox.layout.fixed.horizontal,
+      mytextclock,
+      mykeyboardlayout,
+      bat.widget,
+      btmouse,
+      btsoundbar,
+      cpu.widget,
+      temp.widget,
+      memory.widget,
+      netdowninfo,
+      netupinfo,
+      volume.widget,
+      s.mylayoutbox,
+      mysystray,
+    },
+  }
 end)
 -- }}}
 
@@ -1087,10 +1183,10 @@ awful.spawn.with_shell("~/dotfiles/bin/persistent-ssh-agent")
 
 run_once({
    "nm-applet",
-   "variety --resume",
    "syncthing --no-browser",
-   "picom",
+   "picom --backend glx",
    "lxpolkit",
    "~/activitywatch/aw-qt",
+   "variety --resume",
    "xautolock -time 30 -locker ~/dotfiles/lock.sh"
 })

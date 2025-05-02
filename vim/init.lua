@@ -45,6 +45,11 @@ require("lazy").setup({
       priority = 1000,
       config = function()
         vim.cmd([[colorscheme catppuccin]])
+        vim.api.nvim_set_hl(0, "Normal", { bg = "none", ctermbg = "none" })
+        vim.cmd [[
+          autocmd ColorScheme * highlight Normal guibg=NONE ctermbg=NONE
+        ]]
+
       end,
     },
     {
