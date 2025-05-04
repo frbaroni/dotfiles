@@ -176,6 +176,22 @@ require("lazy").setup({
     {
       'tpope/vim-fugitive',
     },
+    {
+      "yetone/avante.nvim",
+      version = false,
+      opts = {
+        model = "openrouter/openrouter/auto",
+        api_key = os.getenv("OPENROUTER_API_KEY"),
+        base_url = "https://openrouter.ai/api/v1",
+      },
+      build = "make",
+      dependencies = {
+        "nvim-treesitter/nvim-treesitter",
+        "stevearc/dressing.nvim",
+        "nvim-lua/plenary.nvim",
+        "MunifTanjim/nui.nvim",
+      },
+    }
   }
 })
 
@@ -226,5 +242,14 @@ wk.add({
     { "<C-j>", "<C-w>j", desc = "Go down" },
     { "<C-k>", "<C-w>k", desc = "Go up" },
     { "<C-l>", "<C-w>l", desc = "Go right" },
-
+    { "<leader>ac", "<cmd>AvanteChat<cr>", desc = "Start Chat" },
+    { "<leader>as", "<cmd>AvanteStop<cr>", desc = "Stop Chat" },
+    { "<leader>ar", "<cmd>AvanteRewrite<cr>", desc = "Rewrite Selection" },
+    { "<leader>ae", "<cmd>AvanteExplain<cr>", desc = "Explain Code" },
+    { "<leader>ad", "<cmd>AvanteDoc<cr>", desc = "Generate Docs" },
+    { "<leader>af", "<cmd>AvanteFix<cr>", desc = "Fix Code" },
+    { "<leader>ag", "<cmd>AvanteGrammar<cr>", desc = "Fix Grammar" },
+    { "<leader>at", "<cmd>AvanteTests<cr>", desc = "Generate Tests" },
+    { "<leader>ao", "<cmd>AvanteOptimize<cr>", desc = "Optimize Code" },
+    { "<leader>am", "<cmd>AvanteModel<cr>", desc = "Switch Model" },
 })
