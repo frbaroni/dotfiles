@@ -290,6 +290,10 @@ local mymainmenu = awful.menu({
         { "terminal", terminal },
         { "applications", get_applications() },
         { "power", powermenu }  -- Add the power management submenu
+    },
+    theme = { 
+        width = 200,  -- Increase default width from 100 to 200
+        height = 25   -- Slightly increase height for better readability
     }
 })
 
