@@ -88,6 +88,17 @@ local myawesomemenu = {
    { "quit", function() awesome.quit() end },
 }
 
+-- Create a power management menu
+local powermenu = {
+    { "Shutdown Now", "systemctl poweroff" },
+    { "Restart Now", "systemctl reboot" },
+    { "Shutdown in 30 min", "shutdown -h +30" },
+    { "Cancel Scheduled Shutdown", "shutdown -c" },
+    { "Suspend", "systemctl suspend" },
+    { "Hibernate", "systemctl hibernate" },
+    { "Lock Screen", "bash -c '~/dotfiles/lock.sh'" },
+}
+
 -- Function to get all applications from .desktop files with icons
 local function get_applications()
     local apps = {}
@@ -277,7 +288,8 @@ local mymainmenu = awful.menu({
     items = {
         { "awesome", myawesomemenu, beautiful.awesome_icon },
         { "terminal", terminal },
-        { "applications", get_applications() }
+        { "applications", get_applications() },
+        { "power", powermenu }  -- Add the power management submenu
     }
 })
 
@@ -386,12 +398,12 @@ local mykeyboardlayout = kbdcfg.widget
 -- Define colors for our beautiful taskbar
 local colors = {
     bg_gradient_transparency = "#00000000", -- Fully transparent
-    bg_gradient_from = "#28282866",         -- Dark gray with 40% opacity
-    bg_gradient_mid = "#00000033",          -- Black with 20% opacity
-    bg_gradient_to = "#28282866",           -- Dark gray with 40% opacity
-    task_border = "#6272A433",              -- Soft blue with 20% opacity
-    task_bg_normal = "#00000022",           -- Very subtle black with 13% opacity
-    task_bg_focus = "#6272A480",            -- Soft blue with 50% opacity
+    bg_gradient_from = "#28282833",         -- Dark gray with 20% opacity (reduced from 40%)
+    bg_gradient_mid = "#00000022",          -- Black with 13% opacity (reduced from 20%)
+    bg_gradient_to = "#28282833",           -- Dark gray with 20% opacity (reduced from 40%)
+    task_border = "#6272A422",              -- Soft blue with 13% opacity (reduced from 20%)
+    task_bg_normal = "#00000015",           -- Very subtle black with 8% opacity (reduced from 13%)
+    task_bg_focus = "#6272A466",            -- Soft blue with 40% opacity (reduced from 50%)
 }
 
 -- Create a textclock widget
