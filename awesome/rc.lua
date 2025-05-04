@@ -7,7 +7,7 @@ local beautiful = require("beautiful")
 -- Standard awesome library
 -- Define theme font
 local font_family = "CaskaydiaCove Nerd Font Mono"
-local theme_font = font_family .. " 12"
+local theme_font = font_family .. " 10"
 local icon_font = font_family .. " 14"
 local gears = require("gears")
 local awful = require("awful")
@@ -73,6 +73,7 @@ awful.layout.layouts = {
     awful.layout.suit.floating,
     awful.layout.suit.tile.top,
     awful.layout.suit.tile.bottom,
+    awful.layout.suit.tile.right,
     awful.layout.suit.fair,
 }
 -- }}}
@@ -296,6 +297,70 @@ mylauncher:buttons(gears.table.join(
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
 -- }}}
 
+
+local function create_stand_timer_widget(config)
+    config = config or {}
+    local sit_time = config.sit_time or 30 * 60  -- seconds
+    local stand_time = config.stand_time or 30 * 60  -- seconds
+    local font = config.font or "Sans 12"
+
+    local is_paused = false
+    local is_standing = false
+    local remaining = sit_time
+
+    local timer_widget = wibox.widget {
+        widget = wibox.widget.textbox,
+        align = "center",
+        valign = "center",
+        font = font
+    }
+
+    local function update_text()
+        local minutes = math.floor(remaining / 60)
+        local seconds = remaining % 60
+        local status = is_paused and "⏸️" or (is_standing and "🧍" or "🪑")
+        timer_widget.text = string.format("%s%02d:%02d ", status, minutes, seconds)
+    end
+
+    local function toggle_state()
+        is_standing = not is_standing
+        remaining = is_standing and stand_time or sit_time
+        local message = is_standing and "Time to stand up!" or "Time to sit down!"
+        naughty.notify({ title = "Posture Reminder", text = message, timeout = 5 })
+    end
+
+    local main_timer = gears.timer {
+        timeout = 1,
+        autostart = true,
+        callback = function()
+            if not is_paused then
+                remaining = remaining - 1
+                if remaining <= 0 then
+                    toggle_state()
+                end
+            end
+            update_text()
+        end
+    }
+
+    timer_widget:buttons(gears.table.join(
+        awful.button({}, 1, function()
+            is_paused = not is_paused
+            update_text()
+        end)
+    ))
+
+    update_text()
+    return timer_widget
+end
+
+local stand_timer = create_stand_timer_widget({
+    sit_time = 25 * 60,
+    stand_time = 5 * 60,
+    font = theme_font,
+})
+
+
 -- Keyboard map indicator and switcher
 local kbdcfg = {}
 kbdcfg.cmd = "setxkbmap"
@@ -306,7 +371,7 @@ kbdcfg.widget:set_markup("KB")
 kbdcfg.switch = function ()
   kbdcfg.current = kbdcfg.current % #(kbdcfg.layout) + 1
   local t = kbdcfg.layout[kbdcfg.current]
-  kbdcfg.widget:set_markup(themed_icon("#896E89", "󰌌", t[1]))
+  kbdcfg.widget:set_markup(themed_icon("#A96EA9", "󰌌", t[1]))
   os.execute( kbdcfg.cmd .. " " .. t[1] .. " " .. t[2] )
 end
 kbdcfg.current = kbdcfg.current - 1
@@ -770,6 +835,7 @@ awful.screen.connect_for_each_screen(function(s)
     { -- Right widgets
       layout = wibox.layout.fixed.horizontal,
       mytextclock,
+      stand_timer,
       mykeyboardlayout,
       bat.widget,
       btmouse,

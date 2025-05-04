@@ -36,6 +36,11 @@ vim.opt.cursorline = true -- Highlight the current line
 vim.opt.splitbelow = true -- Horizontal splits go below
 vim.opt.splitright = true -- Vertical splits go right
 vim.opt.mouse = "a" -- Enable mouse support
+vim.opt.list = true
+vim.opt.listchars = {
+  tab = "» ",
+  trail = "·",
+}
 
 require("lazy").setup({
   spec = {
