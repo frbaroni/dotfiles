@@ -402,12 +402,12 @@ local mykeyboardlayout = kbdcfg.widget
 -- Define colors for our beautiful taskbar
 local colors = {
     bg_gradient_transparency = "#00000000", -- Fully transparent
-    bg_gradient_from = "#28282833",         -- Dark gray with 20% opacity (reduced from 40%)
-    bg_gradient_mid = "#00000022",          -- Black with 13% opacity (reduced from 20%)
-    bg_gradient_to = "#28282833",           -- Dark gray with 20% opacity (reduced from 40%)
-    task_border = "#6272A422",              -- Soft blue with 13% opacity (reduced from 20%)
-    task_bg_normal = "#00000015",           -- Very subtle black with 8% opacity (reduced from 13%)
-    task_bg_focus = "#6272A466",            -- Soft blue with 40% opacity (reduced from 50%)
+    bg_gradient_from = "#28282833",         -- Dark gray with 20% opacity
+    bg_gradient_mid = "#00000022",          -- Black with 13% opacity
+    bg_gradient_to = "#28282833",           -- Dark gray with 20% opacity
+    task_border = "#6272A422",              -- Soft blue with 13% opacity
+    task_bg_normal = "#6272A415",           -- Soft blue with 8% opacity
+    task_bg_focus = "#00000015",            -- Very subtle black with 8% opacity
 }
 
 -- Create a textclock widget
