@@ -74,14 +74,10 @@ require("lazy").setup({
         })
       end,
     },
-    {
-      "williamboman/mason.nvim",
-    },
+    { "mason-org/mason.nvim", version = "~1.0.0" },
+    { "mason-org/mason-lspconfig.nvim", version = "~1.0.0" },
     {
       "neovim/nvim-lspconfig",
-    },
-    {
-      "williamboman/mason-lspconfig.nvim",
       config = function()
         require("mason").setup()
 
