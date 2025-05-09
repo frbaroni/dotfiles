@@ -345,6 +345,54 @@ local function create_stand_timer_widget(config)
         naughty.notify({ title = "Posture Reminder", text = message, timeout = 5 })
     end
 
+    local function reset_timer()
+        remaining = is_standing and stand_time or sit_time
+        update_text()
+    end
+
+    local function configure_timer()
+        local was_paused = is_paused
+        is_paused = true
+        update_text()
+        local default_input = string.format("%d\n%d", math.floor(sit_time / 60), math.floor(stand_time / 60))
+
+        local cmd = string.format([[
+            echo -e %q | zenity --forms \
+                --title="Configure Stand Timer" \
+                --text="Set your sit and stand durations (minutes)" \
+                --add-entry="Sit time (minutes)" \
+                --add-entry="Stand time (minutes)"
+        ]], default_input)
+
+        awful.spawn.easy_async_with_shell(cmd, function(stdout, _, _, exit_code)
+            if exit_code == 0 then
+                -- Parse the output
+                local new_sit_time, new_stand_time = stdout:match("([^|]+)|([^|]+)")
+                new_sit_time = tonumber(new_sit_time)
+                new_stand_time = tonumber(new_stand_time)
+                if new_sit_time and new_stand_time and 
+                   new_sit_time > 0 and new_stand_time > 0 then
+                    sit_time = new_sit_time * 60
+                    stand_time = new_stand_time * 60
+                    reset_timer()
+                    naughty.notify({ 
+                        title = "Timer Updated", 
+                        text = "Sit: " .. new_sit_time .. " min, Stand: " .. new_stand_time .. " min",
+                        timeout = 3 
+                    })
+                else
+                    naughty.notify({ 
+                        title = "Invalid Input", 
+                        text = "Please enter positive numbers for both durations.",
+                        timeout = 3 
+                    })
+                end
+            end
+            is_paused = was_paused
+            update_text()
+        end)
+    end
+
     local main_timer = gears.timer {
         timeout = 1,
         autostart = true,
@@ -363,6 +411,9 @@ local function create_stand_timer_widget(config)
         awful.button({}, 1, function()
             is_paused = not is_paused
             update_text()
+        end),
+        awful.button({}, 3, function()
+            configure_timer()
         end)
     ))
 
