@@ -70,10 +70,10 @@ local modkey = "Mod4"
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 awful.layout.layouts = {
+    awful.layout.suit.tile.right,
     awful.layout.suit.floating,
     awful.layout.suit.tile.top,
     awful.layout.suit.tile.bottom,
-    awful.layout.suit.tile.right,
     awful.layout.suit.fair,
 }
 -- }}}
@@ -463,6 +463,7 @@ local colors = {
 
 -- Create a textclock widget
 local mytextclock = wibox.widget.textclock()
+mytextclock:set_timezone("America/Sao_Paulo")
 local month_calendar = awful.widget.calendar_popup.month({
     position = "tr",
     opacity = 1,

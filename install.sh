@@ -9,10 +9,10 @@ DOTFILES=$(realpath .)
 DISTRO=$(awk -F= '/^NAME/{print $2}' /etc/os-release | tr -d '"')
 VARIANT=$(awk -F= '/^VARIANT=/{print $2}' /etc/os-release | tr -d '"')
 
-SHARED_PACKAGES='git xclip tmux cargo awesome kitty arandr i3lock peek gamemode zsh variety mpc zenity fzf pavucontrol htop xfce4* flatpak ripgrep steam cmake make scrot i3lock xautolock upower'
+SHARED_PACKAGES='git xclip tmux cargo awesome kitty arandr i3lock peek gamemode zsh variety mpc zenity fzf pavucontrol htop xfce4* flatpak ripgrep steam cmake make scrot i3lock xautolock upower thunderbird'
 ARCH_PACKAGES='virt-manager qemu cronie nodejs borg'
 DEBIAN_PACKAGES='python3-pip ssh-askpass'
-FEDORA_PACKAGES='python3-pip cronie-anacron npm nodejs network-manager-applet picom xkill syncthing borgbackup lxpolkit podman-docker podman-compose vivaldi-stable gnome-font-viewer x11-ssh-askpass'
+FEDORA_PACKAGES='python3-pip cronie-anacron npm nodejs network-manager-applet picom xkill syncthing borgbackup lxpolkit podman-docker podman-compose gnome-font-viewer x11-ssh-askpass'
 FLATPAK_PACKAGES='com.discordapp.Discord org.godotengine.Godot org.keepassxc.KeePassXC me.kozec.syncthingtk org.speedcrunch.SpeedCrunch org.flameshot.Flameshot com.uploadedlobster.peek md.obsidian.Obsidian'
 CREATE_DIRS="${DISTRO_HOME}/.vim_undo ${DISTRO_HOME}/.vim_backup ${DISTRO_HOME}/.vim_swap"
 
@@ -47,13 +47,9 @@ elif [[ "$DISTRO" = "Fedora Linux" || "$DISTRO" == "Nobara Linux" ]]; then
   else
     echo "Updating Fedora Workstation"
     sudo dnf install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-    sudo dnf config-manager --add-repo https://repo.vivaldi.com/archive/vivaldi-fedora.repo
 
     sudo dnf update && sudo dnf upgrade
     sudo dnf install -y ${SHARED_PACKAGES} ${FEDORA_PACKAGES}
-
-    echo "Install vivaldi"
-    sudo dnf install vivaldi-stable
   fi
 else
   echo "NOT KNOWN DISTRO :: $DISTRO ::"
@@ -87,6 +83,7 @@ ensure_symlink ${DOTFILES}/vim ${DISTRO_HOME}/.config/nvim
 ensure_symlink ${DOTFILES}/vim ${DISTRO_HOME}/.vim
 ensure_symlink ${DOTFILES}/kitty ${DISTRO_HOME}/.config/kitty
 ensure_symlink ${DOTFILES}/zsh/zshrc ${DISTRO_HOME}/.zshrc
+ensure_symlink ${DOTFILES}/thunderbird ${DISTRO_HOME}/.thunderbird
 mkdir -p ~/.config/variety
 ensure_symlink ${DOTFILES}/variety/Favorites ${DISTRO_HOME}/.config/variety/Favorites
 ensure_symlink ${DOTFILES}/zsh/zshrc ${DISTRO_HOME}/.zshrc
