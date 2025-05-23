@@ -650,40 +650,93 @@ awful.widget.watch("upower -d", 2, function(widget, stdout)
   switchDevice(nil, "", "")
 end, nil)
 
--- ALSA volume
-local volume = lain.widget.alsa({
-    settings = function()
-        local color = "#BD93F9"
-        local icon
-        if volume_now.status == "off" then
-          icon = "󰝟"
-        else
-          icon = "󰕾"
-        end
-    widget:set_markup(themed_icon(color, icon, volume_now.level .. "%"))
-    end
-})
+-- Create a custom volume widget using PulseAudio
+local function create_volume_widget()
+    local volume_widget = {}
+    local color = "#BD93F9"
+    
+    -- Create the textbox widget
+    volume_widget.widget = wibox.widget.textbox()
+    volume_widget.widget:set_markup(themed_icon(color, "󰕾", "0%"))
+    
+    -- Volume data
+    volume_widget.volume_level = 0
+    volume_widget.is_muted = false
+    
+    -- Update function
+    function volume_widget.update()
+        -- Get volume info from pactl
+        awful.spawn.easy_async_with_shell(
+            "pactl info | grep 'Default Sink' | cut -d: -f2 | xargs -I{} bash -c \"pactl list sinks | sed -n '/Name: *{}/,/^$/p' | grep 'Volume:\\|Mute:'\"",
+            function(stdout)
+                -- Extract volume level
+                local volume_line = stdout:match("front%-left:%s*%d+%s*/%s*(%d+)%%")
+                volume_widget.volume_level = tonumber(volume_line) or 0
 
--- Create tooltip for volume
-local volume_tooltip = awful.tooltip({
-    objects = { volume.widget },
-    timer_function = function()
-        local text = "Volume:\n" ..
-                     "Level: " .. volume_now.level .. "%\n" ..
-                     "Status: " .. (volume_now.status == "off" and "Muted" or "Unmuted") .. "\n"
-        
-        -- Add more detailed volume info
-        local f = io.popen("amixer get " .. volume.channel)
-        if f then
-            local amixer = f:read("*all")
-            f:close()
-            text = text .. "\nDetailed Info:\n" .. amixer
-        end
-        
-        return text
-    end,
-    delay_show = 0.5
-})
+                -- Extract mute status
+                local mute_line = stdout:match("Mute: (%w+)")
+                volume_widget.is_muted = (mute_line == "yes")
+
+                -- Update widget
+                local icon = volume_widget.is_muted and "󰝟" or "󰕾"
+                volume_widget.widget:set_markup(themed_icon(color, icon, volume_widget.volume_level .. "%"))
+            end
+        )
+    end
+    
+    -- Create tooltip
+    volume_widget.tooltip = awful.tooltip({
+        objects = { volume_widget.widget },
+        timer_function = function()
+            -- Get detailed volume info
+            local f = io.popen("pactl list sinks | grep -A 15 'RUNNING\\|SUSPENDED'")
+            local detailed_info = "No detailed information available"
+            if f then
+                detailed_info = f:read("*all")
+                f:close()
+            end
+            
+            local text = "Volume:\n" ..
+                         "Level: " .. volume_widget.volume_level .. "%\n" ..
+                         "Status: " .. (volume_widget.is_muted and "Muted" or "Unmuted") .. "\n\n" ..
+                         "Detailed Info:\n" .. detailed_info
+            
+            return text
+        end,
+        delay_show = 0.5
+    })
+    
+    -- Set up buttons
+    volume_widget.widget:buttons(gears.table.join(
+        awful.button({ }, 1, function() -- Left click to toggle mute
+            awful.spawn.with_shell("pactl set-sink-mute @DEFAULT_SINK@ toggle")
+            volume_widget.update()
+        end),
+        awful.button({ }, 4, function() -- Scroll up to increase volume
+            awful.spawn.with_shell("pactl set-sink-volume @DEFAULT_SINK@ +2%")
+            volume_widget.update()
+        end),
+        awful.button({ }, 5, function() -- Scroll down to decrease volume
+            awful.spawn.with_shell("pactl set-sink-volume @DEFAULT_SINK@ -2%")
+            volume_widget.update()
+        end)
+    ))
+    
+    -- Set up timer for updates
+    local volume_timer = gears.timer({
+        timeout = 1,
+        autostart = true,
+        callback = volume_widget.update
+    })
+    
+    -- Initial update
+    volume_widget.update()
+    
+    return volume_widget
+end
+
+-- Initialize volume widget
+local volume = create_volume_widget()
 
 -- Net
 local netdowninfo = wibox.widget.textbox()
