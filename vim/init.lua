@@ -18,7 +18,6 @@ vim.opt.rtp:prepend(lazypath)
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 vim.opt.number = true -- Show line numbers
-vim.opt.relativenumber = true -- Show relative line numbers
 vim.opt.clipboard = "unnamedplus" -- Use system clipboard
 vim.opt.wrap = false -- Disable line wrapping
 vim.opt.colorcolumn = '120' -- Highlight column 120

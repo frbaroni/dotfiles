@@ -432,7 +432,7 @@ local stand_timer = create_stand_timer_widget({
 local kbdcfg = {}
 kbdcfg.cmd = "setxkbmap"
 kbdcfg.layout = { { "us", "" }, { "br", "" } }
-kbdcfg.current = 2  -- default layout
+kbdcfg.current = 1  -- default layout
 kbdcfg.widget = wibox.widget.textbox()
 kbdcfg.widget:set_markup("KB")
 kbdcfg.switch = function ()
@@ -1048,15 +1048,15 @@ local globalkeys = gears.table.join(
       awful.key({ }, "XF86AudioNext", function () awful.util.spawn("mpc next") end),
       awful.key({ }, "XF86AudioPrev", function () awful.util.spawn("mpc prev") end),
       awful.key({ }, "XF86AudioRaiseVolume", function ()
-            os.execute(string.format("amixer -q set %s 1%%+", volume.channel))
+            awful.util.spawn("pactl set-sink-volume @DEFAULT_SINK@ +2%")
             volume.update()
       end),
       awful.key({ }, "XF86AudioLowerVolume", function ()
-            os.execute(string.format("amixer -q set %s 1%%-", volume.channel))
+            awful.util.spawn("pactl set-sink-volume @DEFAULT_SINK@ -2%")
             volume.update()
       end),
       awful.key({ }, "XF86AudioMute", function ()
-            os.execute(string.format("amixer -q set %s toggle", volume.togglechannel or volume.channel))
+            awful.util.spawn("pactl set-sink-mute @DEFAULT_SINK@ toggle")
             volume.update()
       end),
       

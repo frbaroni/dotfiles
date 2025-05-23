@@ -106,7 +106,7 @@ RPROMPT='%F{cyan}[%*]%f'  # Show time on the right
 # Aliases based on your common commands
 alias l='ls -la'
 alias g='git'
-alias rg='rg --max-line=200'
+alias rg='rg -M200'
 alias fd='fd -i'
 alias pc='podman-compose'
 alias pcu='podman-compose up -d'
