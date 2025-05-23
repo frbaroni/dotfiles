@@ -196,3 +196,7 @@ if [[ -f "$HOME/dotfiles/bin/persistent-ssh-agent" ]]; then
     # Source the script to ensure environment variables are set in current shell
     source "$HOME/dotfiles/bin/persistent-ssh-agent"
 fi
+
+if [[ -f "$HOME/dotfiles/zsh/env" ]]; then
+    source "$HOME/dotfiles/zsh/env"
+fi
