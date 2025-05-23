@@ -9,7 +9,7 @@ DOTFILES=$(realpath .)
 DISTRO=$(awk -F= '/^NAME/{print $2}' /etc/os-release | tr -d '"')
 VARIANT=$(awk -F= '/^VARIANT=/{print $2}' /etc/os-release | tr -d '"')
 
-SHARED_PACKAGES='git xclip tmux cargo awesome kitty arandr i3lock peek gamemode zsh variety mpc zenity fzf pavucontrol htop xfce4* flatpak ripgrep steam cmake make scrot i3lock xautolock upower thunderbird'
+SHARED_PACKAGES='git xclip tmux cargo awesome kitty arandr i3lock peek gamemode zsh variety mpc zenity fzf pavucontrol htop xfce4* flatpak ripgrep steam cmake make scrot i3lock xautolock upower thunderbird xsel'
 ARCH_PACKAGES='virt-manager qemu cronie nodejs borg'
 DEBIAN_PACKAGES='python3-pip ssh-askpass'
 FEDORA_PACKAGES='python3-pip cronie-anacron npm nodejs network-manager-applet picom xkill syncthing borgbackup lxpolkit podman-docker podman-compose gnome-font-viewer x11-ssh-askpass'
@@ -101,10 +101,15 @@ done
 sudo cp ${DOTFILES}/nerdfont/*.ttf /usr/share/fonts
 sudo fc-cache -f -v
 
+# Install fzf bindings to zsh
+fzf --zsh > ~/.fzf.zsh
+
 { # ActivityWatch runs at http://127.0.0.1:5600
-  VERSION=v0.12.2
-  cd ~
-  wget https://github.com/ActivityWatch/activitywatch/releases/download/${VERSION}/activitywatch-${VERSION}-linux-x86_64.zip
-  unzip ./activitywatch-${VERSION}-linux-x86_64.zip
-  rm ./activitywatch-${VERSION}-linux-x86_64.zip
+  if [[ ! -d ~/activitywatch ]]; then
+    VERSION=v0.12.2
+    cd ~
+    wget https://github.com/ActivityWatch/activitywatch/releases/download/${VERSION}/activitywatch-${VERSION}-linux-x86_64.zip
+    unzip ./activitywatch-${VERSION}-linux-x86_64.zip
+    rm ./activitywatch-${VERSION}-linux-x86_64.zip
+  fi
 }
